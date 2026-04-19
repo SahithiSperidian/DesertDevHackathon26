@@ -9,7 +9,8 @@
 
         <div class="text-center mb-4">
           <a href="{{ url_for('auth.index') }}" class="text-decoration-none">
-            <span class="gu-auth-logo"><img src="{{ url_for('static', filename='img/Logo.jpeg') }}" height="36" style="border-radius:6px;"></span>
+            <span class="gu-auth-logo"><img src="{{ url_for('static', filename='img/logo.png') }}" height="36"
+                style="border-radius:6px;"></span>
           </a>
           <h2 class="fw-bold mt-3">Create your account</h2>
           <p class="text-muted">Join New Mexico's local food network</p>
@@ -42,15 +43,8 @@
               <label for="name" class="form-label fw-medium">Full name</label>
               <div class="input-group">
                 <span class="input-group-text gu-input-icon"><i class="bi bi-person"></i></span>
-                <input
-                  type="text"
-                  class="form-control gu-input"
-                  id="name"
-                  name="name"
-                  placeholder="Maria Garcia"
-                  required
-                  autocomplete="name"
-                />
+                <input type="text" class="form-control gu-input" id="name" name="name" placeholder="Maria Garcia"
+                  required autocomplete="name" />
               </div>
             </div>
 
@@ -58,15 +52,8 @@
               <label for="email" class="form-label fw-medium">Email address</label>
               <div class="input-group">
                 <span class="input-group-text gu-input-icon"><i class="bi bi-envelope"></i></span>
-                <input
-                  type="email"
-                  class="form-control gu-input"
-                  id="email"
-                  name="email"
-                  placeholder="you@example.com"
-                  required
-                  autocomplete="email"
-                />
+                <input type="email" class="form-control gu-input" id="email" name="email" placeholder="you@example.com"
+                  required autocomplete="email" />
               </div>
             </div>
 
@@ -76,14 +63,8 @@
               </label>
               <div class="input-group">
                 <span class="input-group-text gu-input-icon"><i class="bi bi-geo-alt"></i></span>
-                <input
-                  type="text"
-                  class="form-control gu-input"
-                  id="location"
-                  name="location"
-                  placeholder="Albuquerque, NM"
-                  autocomplete="address-level2"
-                />
+                <input type="text" class="form-control gu-input" id="location" name="location"
+                  placeholder="Albuquerque, NM" autocomplete="address-level2" />
               </div>
             </div>
 
@@ -91,15 +72,8 @@
               <label for="password" class="form-label fw-medium">Password</label>
               <div class="input-group">
                 <span class="input-group-text gu-input-icon"><i class="bi bi-lock"></i></span>
-                <input
-                  type="password"
-                  class="form-control gu-input"
-                  id="password"
-                  name="password"
-                  placeholder="Min. 8 characters"
-                  required
-                  autocomplete="new-password"
-                />
+                <input type="password" class="form-control gu-input" id="password" name="password"
+                  placeholder="Min. 8 characters" required autocomplete="new-password" />
                 <button class="btn gu-pw-toggle" type="button" id="togglePassword" tabindex="-1">
                   <i class="bi bi-eye" id="toggleIcon"></i>
                 </button>
@@ -115,15 +89,8 @@
               <label for="confirm_password" class="form-label fw-medium">Confirm password</label>
               <div class="input-group">
                 <span class="input-group-text gu-input-icon"><i class="bi bi-lock-fill"></i></span>
-                <input
-                  type="password"
-                  class="form-control gu-input"
-                  id="confirm_password"
-                  name="confirm_password"
-                  placeholder="Repeat password"
-                  required
-                  autocomplete="new-password"
-                />
+                <input type="password" class="form-control gu-input" id="confirm_password" name="confirm_password"
+                  placeholder="Repeat password" required autocomplete="new-password" />
               </div>
               <small class="text-danger d-none" id="pwMatchError">Passwords do not match.</small>
             </div>
