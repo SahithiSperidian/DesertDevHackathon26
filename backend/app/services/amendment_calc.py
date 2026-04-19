@@ -17,7 +17,7 @@ EPA Excess Food Opportunities Map dataset (already loaded by epa_resources.py).
 import math
 import re
 
-from app.services.epa_resources import get_nm_resources
+from backend.app.services.epa_resources import get_nm_resources
 
 # ---------------------------------------------------------------------------
 # Real NM city geocoordinates (latitude, longitude)

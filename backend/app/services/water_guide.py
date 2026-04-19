@@ -18,11 +18,11 @@ import json
 import os
 import logging
 
-from app.services.usgs_water import get_water_status
-from app.services.drought import get_drought_status
-from app.services.noaa_rainfall import get_seasonal_rainfall
-from app.services.et_calculator import get_et_normals, crop_seasonal_et_inches
-from app.services.bor_reservoir import get_reservoir_status
+from backend.app.services.usgs_water import get_water_status
+from backend.app.services.drought import get_drought_status
+from backend.app.services.noaa_rainfall import get_seasonal_rainfall
+from backend.app.services.et_calculator import get_et_normals, crop_seasonal_et_inches
+from backend.app.services.bor_reservoir import get_reservoir_status
 
 logger = logging.getLogger(__name__)
 
@@ -473,7 +473,7 @@ def get_water_guide(soil: dict | None = None, location: str | None = None) -> di
         reservoir = get_reservoir_status()
     except Exception as exc:
         logger.warning("BOR reservoir fetch failed: %s", exc)
-        from app.services.bor_reservoir import _unavailable_payload
+        from backend.app.services.bor_reservoir import _unavailable_payload
         reservoir = _unavailable_payload()
 
     return {

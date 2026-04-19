@@ -49,16 +49,16 @@ def create_app():
         except (ValueError, TypeError):
             return {}
 
-    from app.routes.auth import auth_bp
-    from app.routes.farmer import farmer_bp
-    from app.routes.partner import partner_bp
+    from backend.app.routes.auth import auth_bp
+    from backend.app.routes.farmer import farmer_bp
+    from backend.app.routes.partner import partner_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(farmer_bp, url_prefix="/farmer")
     app.register_blueprint(partner_bp, url_prefix="/partner")
 
     with app.app_context():
-        from app import models
+        from backend.app import models
         db.create_all()
         # Safe migration: add new columns to existing SQLite DB if missing
         _run_migrations(app)

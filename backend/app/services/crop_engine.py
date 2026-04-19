@@ -14,11 +14,11 @@ import json
 import os
 import logging
 
-from app.services.usgs_water import get_water_status
-from app.services.drought import get_drought_status
-from app.services.nass_economics import get_nass_economics
-from app.services.noaa_rainfall import get_seasonal_rainfall
-from app.services.et_calculator import get_et_normals, crop_seasonal_et_inches
+from backend.app.services.usgs_water import get_water_status
+from backend.app.services.drought import get_drought_status
+from backend.app.services.nass_economics import get_nass_economics
+from backend.app.services.noaa_rainfall import get_seasonal_rainfall
+from backend.app.services.et_calculator import get_et_normals, crop_seasonal_et_inches
 
 logger = logging.getLogger(__name__)
 

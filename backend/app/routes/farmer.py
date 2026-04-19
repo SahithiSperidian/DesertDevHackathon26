@@ -2,13 +2,13 @@ import json
 from flask import Blueprint, render_template, jsonify, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from werkzeug.security import check_password_hash
-from app import db
-from app.models import User, SoilTestRequest, FacilityReferral
-from app.services.crop_engine import suggest_crops
-from app.services.epa_resources import get_nm_resources
-from app.services.amendment_calc import calculate_amendments, annotate_distances
-from app.services.nass_price_alert import get_price_alerts
-from app.services.water_guide import get_water_guide
+from backend.app import db
+from backend.app.models import User, SoilTestRequest, FacilityReferral
+from backend.app.services.crop_engine import suggest_crops
+from backend.app.services.epa_resources import get_nm_resources
+from backend.app.services.amendment_calc import calculate_amendments, annotate_distances
+from backend.app.services.nass_price_alert import get_price_alerts
+from backend.app.services.water_guide import get_water_guide
 
 farmer_bp = Blueprint("farmer", __name__)
 
@@ -315,7 +315,7 @@ def soil_resources():
     if not current_user.is_subscribed:
         flash("Soil Resources is a Pro feature. Upgrade to unlock it.", "warning")
         return redirect(url_for("farmer.upgrade"))
-    from app.services.epa_resources import get_nm_resources
+    from backend.app.services.epa_resources import get_nm_resources
     raw = get_nm_resources()
     farmer_location = current_user.location or ""
     if farmer_location:
