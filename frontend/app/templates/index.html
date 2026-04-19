@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}GroundUp — New Mexico Food &amp; Agriculture Platform{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="gu-hero d-flex align-items-center">
+  <div class="container text-center text-white py-5">
+    <p class="gu-hero-eyebrow">Desert Dev Lab Hackathon 2026</p>
+    <h1 class="gu-hero-title">Grow Smarter.<br/>Connect Better.</h1>
+    <p class="gu-hero-sub">
+      GroundUp links New Mexico farmers with local resources — compost, water, equipment, and more —
+      powered by real USDA &amp; state agricultural data.
+    </p>
+    <div class="d-flex gap-3 justify-content-center mt-4 flex-wrap">
+      <a href="{{ url_for('auth.register') }}?role=farmer" class="btn btn-success btn-lg px-4">
+        <i class="bi bi-person-fill me-2"></i>I'm a Farmer
+      </a>
+      <a href="{{ url_for('auth.register') }}?role=partner" class="btn btn-outline-light btn-lg px-4">
+        <i class="bi bi-recycle me-2"></i>I'm a Resource Partner
+      </a>
+    </div>
+    <p class="mt-3 small opacity-75">Already have an account? <a href="{{ url_for('auth.login') }}" class="text-white fw-semibold">Log in</a></p>
+  </div>
+</section>
+
+<!-- Stats bar -->
+<section class="gu-stats-bar py-4">
+  <div class="container">
+    <div class="row text-center g-3">
+      <div class="col-6 col-md-3">
+        <div class="gu-stat-item">
+          <span class="gu-stat-number">98%</span>
+          <span class="gu-stat-label">of ABQ food is out-of-state</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="gu-stat-item">
+          <span class="gu-stat-number">59+</span>
+          <span class="gu-stat-label">avg. age of NM farmers</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="gu-stat-item">
+          <span class="gu-stat-number">17%</span>
+          <span class="gu-stat-label">NM food insecurity rate</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="gu-stat-item">
+          <span class="gu-stat-number">Free</span>
+          <span class="gu-stat-label">soil tests via NMSU Extension</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="container py-5">
+  <h2 class="text-center fw-bold mb-5">How GroundUp Works</h2>
+  <div class="row g-4">
+    <!-- Farmer flow -->
+    <div class="col-md-6">
+      <div class="gu-feature-card h-100">
+        <div class="gu-feature-icon bg-success-subtle">
+          <i class="bi bi-tree-fill text-success fs-3"></i>
+        </div>
+        <h4 class="fw-semibold mt-3">For Farmers</h4>
+        <ul class="list-unstyled mt-3 gu-feature-list">
+          <li><i class="bi bi-check-circle-fill text-success me-2"></i>Book a <strong>free soil test</strong> through NMSU Extension</li>
+          <li><i class="bi bi-check-circle-fill text-success me-2"></i>Get <strong>AI crop suggestions</strong> based on your soil results</li>
+          <li><i class="bi bi-check-circle-fill text-success me-2"></i>See <strong>investment vs. profit charts</strong> per crop</li>
+          <li><i class="bi bi-check-circle-fill text-success me-2"></i>Find local compost, water, and equipment</li>
+          <li><i class="bi bi-check-circle-fill text-success me-2"></i>Access step-by-step farming tutorials</li>
+        </ul>
+        <a href="{{ url_for('auth.register') }}?role=farmer" class="btn btn-success mt-3">Start as Farmer</a>
+      </div>
+    </div>
+    <!-- Partner flow -->
+    <div class="col-md-6">
+      <div class="gu-feature-card h-100">
+        <div class="gu-feature-icon bg-info-subtle">
+          <i class="bi bi-recycle text-info fs-3"></i>
+        </div>
+        <h4 class="fw-semibold mt-3">For Resource Partners</h4>
+        <ul class="list-unstyled mt-3 gu-feature-list">
+          <li><i class="bi bi-check-circle-fill text-info me-2"></i>List <strong>compost</strong> from food waste operations</li>
+          <li><i class="bi bi-check-circle-fill text-info me-2"></i>Share <strong>water access</strong> and irrigation resources</li>
+          <li><i class="bi bi-check-circle-fill text-info me-2"></i>Offer <strong>equipment</strong>, storage, or commercial kitchens</li>
+          <li><i class="bi bi-check-circle-fill text-info me-2"></i>Connect directly with local growers</li>
+          <li><i class="bi bi-check-circle-fill text-info me-2"></i>Track matches and transactions on your dashboard</li>
+        </ul>
+        <a href="{{ url_for('auth.register') }}?role=partner" class="btn btn-info mt-3 text-white">Start as Resource Partner</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="gu-cta-section py-5 text-center text-white">
+  <div class="container">
+    <h2 class="fw-bold">Ready to grow New Mexico's local food system?</h2>
+    <p class="mt-2 opacity-75">Join farmers and resource partners already on GroundUp.</p>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg mt-3 px-5 text-success fw-bold">Create Free Account</a>
+  </div>
+</section>
+{% endblock %}

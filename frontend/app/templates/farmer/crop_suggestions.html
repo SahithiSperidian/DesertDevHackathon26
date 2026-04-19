@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+{% block title %}Crop Match Results — CropPulse{% endblock %}
+
+{% block content %}
+<div class="gu-dashboard-header">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="bi bi-flower2 me-2"></i>Crop Match Results</h2>
+    <p class="mb-2 opacity-75">Based on soil test #{{ test.id }} — {{ test.location or 'NM' }} &mdash; {{ test.created_at.strftime('%b %d, %Y') }}</p>
+    <div class="d-flex flex-wrap gap-2">
+      <a href="{{ url_for('farmer.crop_matches') }}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Crop Matches
+      </a>
+      <a href="{{ url_for('farmer.soil_resources', test_id=test.id) }}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-recycle me-1"></i>Fix My Soil
+      </a>
+      <a href="{{ url_for('farmer.amendments', test_id=test.id) }}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-calculator-fill me-1"></i>Amendment Calculator
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  {# ── Live condition pills ── #}
+  <div class="row g-3 mb-4">
+    <div class="col-auto">
+      {% set ws = suggestions.water.stress_score %}
+      <span class="badge fs-6 px-3 py-2
+        {% if ws < 40 %}bg-success
+        {% elif ws < 70 %}bg-warning text-dark
+        {% else %}bg-danger{% endif %}">
+        <i class="bi bi-droplet-fill me-1"></i>
+        River Stress {{ ws }}/100 — {{ suggestions.water.status }}
+      </span>
+    </div>
+    <div class="col-auto">
+      {% set dl = suggestions.drought.level %}
+      <span class="badge fs-6 px-3 py-2
+        {% if dl == 0 %}bg-success
+        {% elif dl <= 2 %}bg-warning text-dark
+        {% else %}bg-danger{% endif %}">
+        <i class="bi bi-sun-fill me-1"></i>
+        Drought: {{ suggestions.drought.label }}
+      </span>
+    </div>
+    <div class="col-auto">
+      {% if suggestions.rainfall_data.source == 'noaa' %}
+        <span class="badge fs-6 px-3 py-2 bg-info text-dark">
+          <i class="bi bi-cloud-rain me-1"></i>
+          {{ suggestions.rainfall_data.inches }}" seasonal rain — {{ suggestions.rainfall_data.city }}
+          <span class="ms-1 opacity-75" style="font-size:0.7rem;">NOAA live</span>
+        </span>
+      {% else %}
+        <span class="badge fs-6 px-3 py-2 bg-secondary">
+          <i class="bi bi-cloud-rain me-1"></i>
+          {{ suggestions.rainfall_data.inches }}" seasonal rain (NM avg)
+        </span>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Full-width economics chart ── #}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header fw-semibold d-flex align-items-center gap-2">
+      <i class="bi bi-bar-chart-fill"></i>
+      Economics per Acre (USD) — All Crops Compared
+      <span id="econ-year-badge" class="badge bg-secondary bg-opacity-25 text-secondary fw-normal small ms-1"></span>
+      <span class="ms-auto badge bg-secondary bg-opacity-25 text-secondary fw-normal small">Source: USDA NASS Quick Stats</span>
+    </div>
+    <div class="card-body p-3">
+      <div id="econ-chart" style="height:420px;"></div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    {# ═══════════════════════════════════════════════════════
+       LEFT COL — soil summary
+    ═══════════════════════════════════════════════════════ #}
+    <div class="col-lg-4">
+
+      {# Soil test snapshot #}
+      <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold"><i class="bi bi-clipboard-data me-2"></i>Your Soil Test</div>
+        <div class="card-body">
+          <table class="table table-sm mb-0">
+            <tbody>
+              <tr><td class="text-muted">pH</td><td class="fw-semibold">{{ soil.pH }}</td></tr>
+              <tr><td class="text-muted">Nitrogen</td><td class="fw-semibold text-capitalize">{{ soil.nitrogen }}</td></tr>
+              <tr><td class="text-muted">Phosphorus</td><td class="fw-semibold text-capitalize">{{ soil.phosphorus }}</td></tr>
+              <tr><td class="text-muted">Organic Matter</td><td class="fw-semibold">{{ soil.organic_matter }}%</td></tr>
+              {% if soil.potassium %}<tr><td class="text-muted">Potassium</td><td class="fw-semibold text-capitalize">{{ soil.potassium }}</td></tr>{% endif %}
+              {% if soil.salinity %}<tr><td class="text-muted">Salinity</td><td class="fw-semibold text-capitalize">{{ soil.salinity }}</td></tr>{% endif %}
+            </tbody>
+          </table>
+          {% if soil.notes %}
+          <div class="mt-2 small text-muted"><strong>Notes:</strong> {{ soil.notes }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# Overall soil tips #}
+      {% if suggestions.soil_summary %}
+      <div class="card shadow-sm mb-4 border-warning">
+        <div class="card-header fw-semibold bg-warning bg-opacity-10">
+          <i class="bi bi-tools me-2"></i>Soil Improvement Tips
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for tip in suggestions.soil_summary %}
+          <li class="list-group-item small"><i class="bi bi-arrow-right-circle-fill text-warning me-2"></i>{{ tip }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+
+    </div>
+
+    {# ═══════════════════════════════════════════════════════
+       RIGHT COL — ranked crop cards
+    ═══════════════════════════════════════════════════════ #}
+    <div class="col-lg-8">
+
+      {# ── Feature 5: Water stress contextual banner ── #}
+      {% set ws = suggestions.water.stress_score %}
+      {% if ws >= 70 %}
+      <div class="alert border-0 alert-danger d-flex align-items-center gap-2 mb-3 py-2">
+        <i class="bi bi-droplet-fill fs-5"></i>
+        <div><strong>High water stress</strong> (Rio Grande {{ ws }}/100) — drought-tolerant crops are strongly preferred right now.</div>
+      </div>
+      {% elif ws >= 40 %}
+      <div class="alert border-0 alert-warning d-flex align-items-center gap-2 mb-3 py-2">
+        <i class="bi bi-droplet-half fs-5"></i>
+        <div><strong>Moderate water stress</strong> ({{ ws }}/100) — plan irrigation carefully; avoid high-water crops if possible.</div>
+      </div>
+      {% else %}
+      <div class="alert border-0 alert-success d-flex align-items-center gap-2 mb-3 py-2">
+        <i class="bi bi-droplet fs-5"></i>
+        <div><strong>Low water stress</strong> ({{ ws }}/100) — good conditions for a wide range of crops.</div>
+      </div>
+      {% endif %}
+
+      <h5 class="fw-semibold mb-3">
+        {{ suggestions.crops|length }} crops ranked by suitability for your soil
+      </h5>
+
+      {% for crop in suggestions.crops %}
+      {% set score = crop.score %}
+      {% if score >= 75 %}{% set score_cls = "success" %}{% set score_label = "Great match" %}
+      {% elif score >= 50 %}{% set score_cls = "warning" %}{% set score_label = "Good match" %}
+      {% elif score >= 25 %}{% set score_cls = "secondary" %}{% set score_label = "Possible" %}
+      {% else %}{% set score_cls = "danger" %}{% set score_label = "Not recommended" %}
+      {% endif %}
+
+      <div class="card shadow-sm mb-3 border-{{ score_cls }} border-opacity-50">
+        <div class="card-body">
+          <div class="d-flex align-items-start gap-3">
+
+            {# Score ring #}
+            <div class="text-center" style="min-width:70px;">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white bg-{{ score_cls }}"
+                   style="width:64px;height:64px;font-size:1.2rem;">
+                {{ score }}
+              </div>
+              <div class="small text-{{ score_cls }} mt-1">{{ score_label }}</div>
+            </div>
+
+            {# Crop info #}
+            <div class="flex-grow-1">
+              <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                <h6 class="mb-0 fw-bold fs-5">{{ crop.emoji }} {{ crop.name }}</h6>
+                {% if crop.soil_ok %}
+                  <span class="badge bg-success bg-opacity-75"><i class="bi bi-check-circle me-1"></i>Soil OK</span>
+                {% else %}
+                  <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i>Soil needs work</span>
+                {% endif %}
+
+                {# ── Feature 5: Water stress risk badge ── #}
+                {% set ws = suggestions.water.stress_score %}
+                {% if crop.water_ok %}
+                  {% if ws < 40 %}
+                    <span class="badge bg-info bg-opacity-75"><i class="bi bi-droplet me-1"></i>Low water stress</span>
+                  {% elif ws < 70 %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-droplet-half me-1"></i>Moderate water stress</span>
+                  {% else %}
+                    <span class="badge bg-secondary bg-opacity-75"><i class="bi bi-droplet me-1"></i>Stress managed — drought tolerant</span>
+                  {% endif %}
+                {% else %}
+                  {% if ws >= 70 %}
+                    <span class="badge bg-danger bg-opacity-90"><i class="bi bi-exclamation-triangle-fill me-1"></i>High water stress</span>
+                  {% else %}
+                    <span class="badge bg-danger bg-opacity-75"><i class="bi bi-exclamation-triangle me-1"></i>Water risk</span>
+                  {% endif %}
+                {% endif %}
+              </div>
+
+              <p class="text-muted small mb-2">{{ crop.description }}</p>
+
+              {# Quick stats row #}
+              <div class="d-flex gap-3 flex-wrap small text-muted mb-2">
+                <span><i class="bi bi-calendar3 me-1"></i>{{ crop.days_to_harvest }}d to harvest</span>
+                <span><i class="bi bi-droplet-half me-1"></i>Water: <strong>{{ crop.water_need }}</strong></span>
+                <span><i class="bi bi-sun me-1"></i>Drought tolerance: <strong>{{ crop.drought_tolerance }}</strong></span>
+                <span><i class="bi bi-calendar2-week me-1"></i>
+                  {% for s in crop.season %}{{ s | capitalize }}{% if not loop.last %} / {% endif %}{% endfor %}
+                </span>
+              </div>
+
+              {# Live water budget breakdown #}
+              <div class="d-flex align-items-center gap-2 flex-wrap small mb-2 px-2 py-2 rounded"
+                   style="background:rgba(13,110,253,0.06); border:1px solid rgba(13,110,253,0.12);">
+                <i class="bi bi-droplet-fill text-primary"></i>
+                <span class="text-muted">Irrigation needed:</span>
+                <span class="fw-semibold">{{ crop.water_base_in }}" base</span>
+                <span class="text-muted">−</span>
+                <span class="text-success fw-semibold">
+                  <i class="bi bi-cloud-rain me-1"></i>{{ crop.water_rainfall_in }}" rain
+                </span>
+                <span class="text-muted">=</span>
+                <span class="fw-bold text-primary">{{ crop.water_net_in }}" net</span>
+                <span class="text-muted">({{ "{:,}".format(crop.water_net_gal) }} gal/acre)</span>
+                {% if crop.water_et_method == 'penman-monteith' %}
+                  <span class="badge bg-primary ms-1" style="font-size:0.6rem;" title="ASCE Penman-Monteith (FAO-56)">PM</span>
+                {% elif crop.water_et_method == 'hargreaves' %}
+                  <span class="badge bg-info text-dark ms-1" style="font-size:0.6rem;" title="Hargreaves-Samani">HS</span>
+                {% else %}
+                  <span class="badge bg-secondary ms-1" style="font-size:0.6rem;" title="NMSU static estimate">NMSU</span>
+                {% endif %}
+              </div>
+
+              {# Economics strip #}
+              <div class="row g-2 mb-2">
+                <div class="col-4">
+                  <div class="rounded p-2 text-center bg-light small">
+                    <div class="text-muted">Invest</div>
+                    <div class="fw-bold">${{ "{:,}".format(crop.economics.investment_per_acre_usd) }}</div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="rounded p-2 text-center bg-light small">
+                    <div class="text-muted">Revenue</div>
+                    <div class="fw-bold text-success">${{ "{:,}".format(crop.economics.revenue_per_acre_usd) }}</div>
+                  </div>
+                </div>
+                <div class="col-4">
+                  {% set profit = crop.economics.profit_per_acre_usd %}
+                  <div class="rounded p-2 text-center bg-light small">
+                    <div class="text-muted">Profit</div>
+                    <div class="fw-bold {% if profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                      {% if profit >= 0 %}+{% endif %}${{ "{:,}".format(profit) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="small text-muted"><i class="bi bi-info-circle me-1"></i>Source: {{ crop.economics.source }}</div>
+
+              {# Issues / amendments #}
+              {% if crop.issues %}
+              <ul class="mt-2 mb-0 ps-3 small">
+                {% for issue in crop.issues %}
+                <li class="{% if issue.startswith('✓') %}text-success{% else %}text-warning-emphasis{% endif %}">{{ issue }}</li>
+                {% endfor %}
+              </ul>
+              {% endif %}
+
+              {% if crop.amendments %}
+              <div class="mt-2">
+                {% for fix in crop.amendments %}
+                <span class="badge bg-secondary bg-opacity-25 text-secondary me-1 mb-1 small">🔧 {{ fix }}</span>
+                {% endfor %}
+              </div>
+              {% endif %}
+
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+  </div>
+</div>
+
+{# ── Plotly chart script ── #}
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script>
+(function () {
+  const crops = {{ suggestions.crops | tojson }};
+  const names  = crops.map(c => c.emoji + ' ' + c.name);
+  const invest = crops.map(c => c.economics.investment_per_acre_usd);
+  const revenue = crops.map(c => c.economics.revenue_per_acre_usd);
+  const profit  = crops.map(c => c.economics.profit_per_acre_usd);
+
+  // Derive year range from NASS data_year fields
+  const years = crops.map(c => c.economics.data_year).filter(y => y && y > 0);
+  const minYear = years.length ? Math.min(...years) : null;
+  const maxYear = years.length ? Math.max(...years) : null;
+  const yearLabel = minYear && maxYear
+    ? (minYear === maxYear ? `${minYear} data` : `${minYear}–${maxYear} data`)
+    : 'estimated data';
+
+  // Populate the badge in the card header
+  const badge = document.getElementById('econ-year-badge');
+  if (badge) badge.textContent = yearLabel;
+
+  const layout = {
+    barmode: 'group',
+    title: { text: `USD per acre · ${yearLabel}`, font: { size: 12, color: '#6c757d' }, x: 0.5, xanchor: 'center', y: 0.98 },
+    margin: { t: 36, r: 20, b: 60, l: 80 },
+    legend: { orientation: 'h', y: -0.18, x: 0.5, xanchor: 'center', font: { size: 13 } },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { size: 13 },
+    xaxis: { tickangle: -20, automargin: true },
+    yaxis: { title: 'USD / acre', tickprefix: '$', separatethousands: true, gridcolor: '#e9ecef' },
+    bargap: 0.25,
+    bargroupgap: 0.08,
+  };
+
+  Plotly.newPlot('econ-chart', [
+    { name: 'Investment', x: names, y: invest,  type: 'bar', marker: { color: '#6c757d' } },
+    { name: 'Revenue',   x: names, y: revenue, type: 'bar', marker: { color: '#198754' } },
+    { name: 'Profit',    x: names, y: profit,  type: 'bar',
+      marker: { color: profit.map(v => v >= 0 ? '#0dcaf0' : '#dc3545') } },
+  ], layout, { responsive: true, displayModeBar: false });
+})();
+</script>
+{% endblock %}

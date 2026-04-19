@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Upgrade to Pro — CropPulse{% endblock %}
+
+{% block content %}
+<div class="gu-dashboard-header">
+  <div class="container d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="bi bi-stars me-2"></i>CropPulse Pro</h2>
+      <p class="mb-0 opacity-75">Unlock the full platform for $15 / month</p>
+    </div>
+    <a href="{{ url_for('farmer.dashboard') }}" class="btn btn-outline-light btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+    </a>
+  </div>
+</div>
+
+<div class="container py-5" style="max-width: 860px;">
+
+  {# Plan comparison #}
+  <div class="row g-4 mb-5">
+
+    {# Free #}
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom">
+          <span class="fw-bold fs-5">Free</span>
+          <span class="ms-2 text-muted">$0 / month</span>
+          {% if not current_user.is_subscribed %}
+          <span class="badge bg-success ms-2">Current plan</span>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <li class="py-2 border-bottom"><i class="bi bi-check-circle-fill text-success me-2"></i>1 free soil test booking</li>
+            <li class="py-2 border-bottom"><i class="bi bi-check-circle-fill text-success me-2"></i>Crop match for that test</li>
+            <li class="py-2 border-bottom"><i class="bi bi-check-circle-fill text-success me-2"></i>USDA crop price signals</li>
+            <li class="py-2 border-bottom text-muted"><i class="bi bi-x-circle me-2"></i>Additional tests charged at lab rates</li>
+            <li class="py-2 border-bottom text-muted"><i class="bi bi-x-circle me-2"></i>Water Guide</li>
+            <li class="py-2 border-bottom text-muted"><i class="bi bi-x-circle me-2"></i>Amendment Calculator</li>
+            <li class="py-2 text-muted"><i class="bi bi-x-circle me-2"></i>Soil Resources</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    {# Pro #}
+    <div class="col-md-6">
+      <div class="card border-0 shadow h-100" style="border: 2px solid var(--gu-green) !important;">
+        <div class="card-header border-bottom" style="background: linear-gradient(135deg,#1a6b3a,#2d9e5f); color:#fff;">
+          <span class="fw-bold fs-5">Pro</span>
+          <span class="ms-2">$15 / month</span>
+          {% if current_user.is_subscribed %}
+          <span class="badge bg-success ms-2">Current plan</span>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <li class="py-2 border-bottom"><i class="bi bi-check-circle-fill text-success me-2"></i>Everything in Free</li>
+            <li class="py-2 border-bottom"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>5 free soil tests</strong>, then lab rates apply</li>
+            <li class="py-2 border-bottom"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Water Guide</strong> — live ET + reservoir data</li>
+            <li class="py-2 border-bottom"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Amendment Calculator</strong> — buy local or donate</li>
+            <li class="py-2 border-bottom"><i class="bi bi-check-circle-fill text-success me-2"></i><strong>Soil Resources</strong> — NM composting &amp; facilities</li>
+            <li class="py-2 border-bottom"><i class="bi bi-check-circle-fill text-success me-2"></i>Soil health trend charts</li>
+            <li class="py-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Priority feature access</li>
+          </ul>
+
+          {% if not current_user.is_subscribed %}
+          <div class="mt-4">
+            <form method="POST" action="{{ url_for('farmer.mock_subscribe') }}">
+              <button type="submit" class="btn btn-success w-100 fw-semibold py-2">
+                <i class="bi bi-lightning-fill me-2"></i>Upgrade to Pro — $15/month
+              </button>
+            </form>
+            <p class="text-muted small text-center mt-2 mb-0">Demo mode — no payment required</p>
+          </div>
+          {% else %}
+          <div class="mt-4 text-center">
+            <span class="badge bg-success px-3 py-2 fs-6"><i class="bi bi-patch-check-fill me-1"></i>Pro Active</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Cancel plan (Pro users only) #}
+  {% if current_user.is_subscribed %}
+  <div class="card border-0 shadow-sm">
+    <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <div class="fw-semibold">Cancel Pro subscription</div>
+        <div class="text-muted small">You'll be moved to the Free plan immediately.</div>
+      </div>
+      <form method="POST" action="{{ url_for('farmer.cancel_subscription') }}"
+            onsubmit="return confirm('Cancel your Pro subscription?')">
+        <button type="submit" class="btn btn-outline-danger btn-sm">Cancel Subscription</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

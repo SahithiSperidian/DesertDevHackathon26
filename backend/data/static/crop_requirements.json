@@ -1,0 +1,352 @@
+{
+  "note": "All economics sourced from USDA NASS Quick Stats (NM state-level surveys). Soil requirements from NMSU Cooperative Extension guidelines.",
+  "crops": [
+    {
+      "id": "chile_pepper",
+      "name": "Chile Pepper",
+      "emoji": "🌶️",
+      "description": "New Mexico signature crop. Hatch and Chimayo varieties command premium prices. NASS NM 2025: 135 CWT/acre at \\.40/CWT.",
+      "soil": {
+        "ph_min": 6.0,
+        "ph_max": 7.5,
+        "nitrogen": [
+          "medium",
+          "high"
+        ],
+        "phosphorus": [
+          "medium",
+          "high"
+        ],
+        "organic_matter_min": 1.0
+      },
+      "water": {
+        "need": "medium",
+        "irrigation_inches_per_season": 24,
+        "drought_tolerance": "low"
+      },
+      "et": {
+        "growing_months": [5, 6, 7, 8, 9, 10],
+        "kc_monthly": {"5": 0.60, "6": 0.80, "7": 1.05, "8": 1.05, "9": 1.00, "10": 0.90},
+        "kc_source": "FAO-56 Table 12 — Pepper"
+      },
+      "season": [
+        "spring",
+        "summer"
+      ],
+      "days_to_harvest": 75,
+      "economics": {
+        "investment_per_acre_usd": 3000,
+        "revenue_per_acre_usd": 6804,
+        "profit_per_acre_usd": 3804
+      },
+      "nm_regions": [
+        "central",
+        "south",
+        "rio_grande_valley"
+      ]
+    },
+    {
+      "id": "onion",
+      "name": "Onion",
+      "emoji": "🧅",
+      "description": "Hatch Valley onions are globally recognized. Highest revenue-per-acre of any NM crop. NASS NM 2025: 590 CWT/acre at \\.30/CWT.",
+      "soil": {
+        "ph_min": 6.0,
+        "ph_max": 7.0,
+        "nitrogen": [
+          "medium",
+          "high"
+        ],
+        "phosphorus": [
+          "medium"
+        ],
+        "organic_matter_min": 1.2
+      },
+      "water": {
+        "need": "medium",
+        "irrigation_inches_per_season": 18,
+        "drought_tolerance": "low"
+      },
+      "et": {
+        "growing_months": [2, 3, 4, 5, 6, 7],
+        "kc_monthly": {"2": 0.70, "3": 0.75, "4": 0.90, "5": 1.05, "6": 1.05, "7": 0.75},
+        "kc_source": "FAO-56 Table 12 — Onion (dry)"
+      },
+      "season": [
+        "spring",
+        "fall"
+      ],
+      "days_to_harvest": 100,
+      "economics": {
+        "investment_per_acre_usd": 5000,
+        "revenue_per_acre_usd": 16107,
+        "profit_per_acre_usd": 11107
+      },
+      "nm_regions": [
+        "south",
+        "rio_grande_valley"
+      ]
+    },
+    {
+      "id": "corn",
+      "name": "Corn (Maize)",
+      "emoji": "🌽",
+      "description": "Versatile field crop for grain or silage. Good rotation partner. NASS NM 2025: 173 BU/acre at \\.15/BU.",
+      "soil": {
+        "ph_min": 5.8,
+        "ph_max": 7.0,
+        "nitrogen": [
+          "high"
+        ],
+        "phosphorus": [
+          "medium",
+          "high"
+        ],
+        "organic_matter_min": 1.5
+      },
+      "water": {
+        "need": "medium",
+        "irrigation_inches_per_season": 20,
+        "drought_tolerance": "medium"
+      },
+      "et": {
+        "growing_months": [5, 6, 7, 8, 9],
+        "kc_monthly": {"5": 0.30, "6": 0.65, "7": 1.20, "8": 1.20, "9": 0.35},
+        "kc_source": "FAO-56 Table 12 — Maize (field)"
+      },
+      "season": [
+        "spring",
+        "summer"
+      ],
+      "days_to_harvest": 90,
+      "economics": {
+        "investment_per_acre_usd": 700,
+        "revenue_per_acre_usd": 891,
+        "profit_per_acre_usd": 191
+      },
+      "nm_regions": [
+        "central",
+        "north",
+        "east"
+      ]
+    },
+    {
+      "id": "alfalfa",
+      "name": "Alfalfa (Hay)",
+      "emoji": "🌿",
+      "description": "New Mexico #1 field crop by total value. NASS NM 2026: \\/TON. Irrigated yield ~6 tons/acre (NMSU Extension).",
+      "soil": {
+        "ph_min": 6.5,
+        "ph_max": 8.0,
+        "nitrogen": [
+          "low",
+          "medium"
+        ],
+        "phosphorus": [
+          "medium",
+          "high"
+        ],
+        "organic_matter_min": 0.8
+      },
+      "water": {
+        "need": "high",
+        "irrigation_inches_per_season": 48,
+        "drought_tolerance": "low"
+      },
+      "et": {
+        "growing_months": [4, 5, 6, 7, 8, 9, 10],
+        "kc_monthly": {"4": 0.90, "5": 1.10, "6": 1.20, "7": 1.20, "8": 1.15, "9": 1.05, "10": 0.85},
+        "kc_source": "FAO-56 Table 12 — Alfalfa hay (perennial)"
+      },
+      "season": [
+        "spring",
+        "summer",
+        "fall"
+      ],
+      "days_to_harvest": 60,
+      "economics": {
+        "investment_per_acre_usd": 900,
+        "revenue_per_acre_usd": 1200,
+        "profit_per_acre_usd": 300
+      },
+      "nm_regions": [
+        "central",
+        "south",
+        "north",
+        "rio_grande_valley"
+      ]
+    },
+    {
+      "id": "wheat",
+      "name": "Wheat",
+      "emoji": "🌾",
+      "description": "Reliable dryland or irrigated grain. NASS NM 2025: 31 BU/acre at \\.50/BU.",
+      "soil": {
+        "ph_min": 6.0,
+        "ph_max": 7.5,
+        "nitrogen": [
+          "medium",
+          "high"
+        ],
+        "phosphorus": [
+          "medium"
+        ],
+        "organic_matter_min": 0.8
+      },
+      "water": {
+        "need": "low",
+        "irrigation_inches_per_season": 12,
+        "drought_tolerance": "medium"
+      },
+      "et": {
+        "growing_months": [10, 11, 12, 1, 2, 3, 4, 5, 6],
+        "kc_monthly": {"10": 0.40, "11": 0.50, "12": 0.70, "1": 1.00, "2": 1.15, "3": 1.15, "4": 0.95, "5": 0.70, "6": 0.25},
+        "kc_source": "FAO-56 Table 12 — Wheat (winter)"
+      },
+      "season": [
+        "fall",
+        "spring"
+      ],
+      "days_to_harvest": 120,
+      "economics": {
+        "investment_per_acre_usd": 250,
+        "revenue_per_acre_usd": 140,
+        "profit_per_acre_usd": -110
+      },
+      "nm_regions": [
+        "east",
+        "north",
+        "central"
+      ]
+    },
+    {
+      "id": "sorghum",
+      "name": "Sorghum",
+      "emoji": "🌱",
+      "description": "Extremely drought-tolerant grain for water-stressed eastern NM. NASS NM 2018: 38 BU/acre at \\.98/CWT.",
+      "soil": {
+        "ph_min": 5.5,
+        "ph_max": 8.5,
+        "nitrogen": [
+          "medium",
+          "high"
+        ],
+        "phosphorus": [
+          "low",
+          "medium"
+        ],
+        "organic_matter_min": 0.5
+      },
+      "water": {
+        "need": "low",
+        "irrigation_inches_per_season": 8,
+        "drought_tolerance": "high"
+      },
+      "et": {
+        "growing_months": [6, 7, 8, 9, 10],
+        "kc_monthly": {"6": 0.30, "7": 0.65, "8": 1.00, "9": 1.00, "10": 0.55},
+        "kc_source": "FAO-56 Table 12 — Sorghum (grain)"
+      },
+      "season": [
+        "summer"
+      ],
+      "days_to_harvest": 100,
+      "economics": {
+        "investment_per_acre_usd": 350,
+        "revenue_per_acre_usd": 265,
+        "profit_per_acre_usd": -85
+      },
+      "nm_regions": [
+        "central",
+        "south",
+        "east"
+      ]
+    },
+    {
+      "id": "pecans",
+      "name": "Pecans",
+      "emoji": "🥜",
+      "description": "NM is a top US pecan producer. High long-term return once established. NASS NM 2024: 1,730 LB/acre at \\.97/LB.",
+      "soil": {
+        "ph_min": 6.0,
+        "ph_max": 8.0,
+        "nitrogen": [
+          "medium",
+          "high"
+        ],
+        "phosphorus": [
+          "medium"
+        ],
+        "organic_matter_min": 1.0
+      },
+      "water": {
+        "need": "medium",
+        "irrigation_inches_per_season": 36,
+        "drought_tolerance": "medium"
+      },
+      "et": {
+        "growing_months": [4, 5, 6, 7, 8, 9, 10],
+        "kc_monthly": {"4": 0.60, "5": 0.75, "6": 0.95, "7": 1.10, "8": 1.10, "9": 1.00, "10": 0.65},
+        "kc_source": "FAO-56 Table 12 — Pecan"
+      },
+      "season": [
+        "spring",
+        "summer",
+        "fall"
+      ],
+      "days_to_harvest": 365,
+      "economics": {
+        "investment_per_acre_usd": 1200,
+        "revenue_per_acre_usd": 3408,
+        "profit_per_acre_usd": 2208
+      },
+      "nm_regions": [
+        "south",
+        "rio_grande_valley",
+        "central"
+      ]
+    },
+    {
+      "id": "cotton",
+      "name": "Cotton",
+      "emoji": "🌸",
+      "description": "Traditional NM field crop in warm southern regions. NASS NM 2025: 675 LB lint/acre.",
+      "soil": {
+        "ph_min": 5.8,
+        "ph_max": 8.0,
+        "nitrogen": [
+          "medium",
+          "high"
+        ],
+        "phosphorus": [
+          "medium"
+        ],
+        "organic_matter_min": 0.5
+      },
+      "water": {
+        "need": "medium",
+        "irrigation_inches_per_season": 24,
+        "drought_tolerance": "medium"
+      },
+      "et": {
+        "growing_months": [5, 6, 7, 8, 9, 10],
+        "kc_monthly": {"5": 0.45, "6": 0.75, "7": 1.15, "8": 1.15, "9": 1.00, "10": 0.70},
+        "kc_source": "FAO-56 Table 12 — Cotton"
+      },
+      "season": [
+        "spring",
+        "summer"
+      ],
+      "days_to_harvest": 150,
+      "economics": {
+        "investment_per_acre_usd": 600,
+        "revenue_per_acre_usd": 99,
+        "profit_per_acre_usd": -501
+      },
+      "nm_regions": [
+        "south",
+        "east"
+      ]
+    }
+  ]
+}

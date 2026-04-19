@@ -1,0 +1,6 @@
+.env
+venv/
+__pycache__/
+instance/
+data/live/
+*.pyc

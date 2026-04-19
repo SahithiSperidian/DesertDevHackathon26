@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Crop Matches — CropPulse{% endblock %}
+
+{% block content %}
+<div class="gu-dashboard-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-2" style="--bs-breadcrumb-divider-color: rgba(255,255,255,0.5); opacity:.8">
+        <li class="breadcrumb-item"><a href="{{ url_for('farmer.dashboard') }}" class="text-white">Dashboard</a></li>
+        <li class="breadcrumb-item active text-white">Crop Matches</li>
+      </ol>
+    </nav>
+    <h2 class="fw-bold mb-1"><i class="bi bi-flower2 me-2"></i>Crop Matches</h2>
+    <p class="mb-0 opacity-75">Select a completed soil test to view personalised crop recommendations.</p>
+  </div>
+</div>
+
+<div class="container py-4" style="max-width: 720px;">
+
+  {% if not completed %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-body text-center py-5 text-muted">
+        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+        <p class="mb-3">No completed soil tests yet.</p>
+        <a href="{{ url_for('farmer.soil_test') }}" class="btn btn-success">
+          <i class="bi bi-plus me-1"></i>Book a Soil Test
+        </a>
+      </div>
+    </div>
+  {% else %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold border-bottom d-flex align-items-center gap-2">
+        <i class="bi bi-list-check text-success"></i> Completed Soil Tests
+        <span class="ms-auto badge bg-success-subtle text-success">{{ completed|length }} test{{ 's' if completed|length > 1 }}</span>
+      </div>
+      <div class="list-group list-group-flush">
+        {% for test in completed %}
+          <div class="list-group-item px-4 py-3">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+              <div>
+                <div class="fw-semibold"><span class="text-muted me-2">{{ loop.index }}.</span>{{ test.test_center }}</div>
+                <div class="text-muted small mt-1">
+                  <i class="bi bi-geo-alt me-1"></i>{{ test.location or 'Location not set' }}
+                  &nbsp;&middot;&nbsp;
+                  <i class="bi bi-calendar3 me-1"></i>{{ test.created_at.strftime('%b %d, %Y') }}
+                </div>
+              </div>
+              <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Completed</span>
+            </div>
+
+            {% if test.results_json %}
+              {% set r = test.results_json | from_json %}
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="badge bg-light text-dark border">pH {{ r.pH }}</span>
+                <span class="badge bg-light text-dark border">N: {{ r.nitrogen }}</span>
+                <span class="badge bg-light text-dark border">P: {{ r.phosphorus }}</span>
+                <span class="badge bg-light text-dark border">OM: {{ r.organic_matter }}</span>
+              </div>
+            {% endif %}
+
+            <div class="d-flex justify-content-end align-items-center gap-2">
+              <a href="{{ url_for('farmer.crop_match', test_id=test.id) }}"
+                 class="btn btn-success btn-sm">
+                <i class="bi bi-flower2 me-1"></i>View Crop Match
+              </a>
+              <a href="{{ url_for('farmer.soil_test_results', test_id=test.id) }}"
+                 class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-pencil me-1"></i>Edit
+              </a>
+              <form method="POST" action="{{ url_for('farmer.delete_soil_test', test_id=test.id) }}"
+                    onsubmit="return confirm('Remove this soil test record?')">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

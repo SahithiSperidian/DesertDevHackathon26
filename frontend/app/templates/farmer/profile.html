@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% block title %}My Profile — CropPulse{% endblock %}
+
+{% block content %}
+<div class="gu-dashboard-header">
+  <div class="container d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="bi bi-person-circle me-2"></i>My Profile</h2>
+      <p class="mb-0 opacity-75">Manage your account details, farm info, and security settings</p>
+    </div>
+    <a href="{{ url_for('farmer.dashboard') }}" class="btn btn-outline-light btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+    </a>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  <div class="row g-4">
+
+    {# ── Left column: avatar + account summary ── #}
+    <div class="col-lg-3">
+      <div class="card shadow-sm text-center mb-4">
+        <div class="card-body py-4">
+          <div class="rounded-circle bg-success d-inline-flex align-items-center justify-content-center mb-3"
+               style="width:80px;height:80px;">
+            <span class="text-white fw-bold" style="font-size:2rem;">
+              {{ current_user.name[0].upper() }}
+            </span>
+          </div>
+          <h5 class="fw-bold mb-1">{{ current_user.name }}</h5>
+          {% if current_user.farm_name %}
+          <div class="text-muted small mb-1">
+            <i class="bi bi-house-fill me-1"></i>{{ current_user.farm_name }}
+          </div>
+          {% endif %}
+          <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 mb-2">
+            <i class="bi bi-person-badge me-1"></i>Farmer
+          </span>
+          <div class="text-muted small mt-2">
+            <i class="bi bi-calendar3 me-1"></i>Member since {{ current_user.created_at.strftime('%b %Y') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold small">Quick Info</div>
+        <ul class="list-group list-group-flush small">
+          <li class="list-group-item d-flex gap-2 align-items-start">
+            <i class="bi bi-envelope-fill text-muted mt-1 flex-shrink-0"></i>
+            <span class="text-break">{{ current_user.email }}</span>
+          </li>
+          <li class="list-group-item d-flex gap-2 align-items-start">
+            <i class="bi bi-telephone-fill text-muted mt-1 flex-shrink-0"></i>
+            <span>{{ current_user.phone or '—' }}</span>
+          </li>
+          <li class="list-group-item d-flex gap-2 align-items-start">
+            <i class="bi bi-geo-alt-fill text-muted mt-1 flex-shrink-0"></i>
+            <span>{{ current_user.location or '—' }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    {# ── Right column: forms ── #}
+    <div class="col-lg-9">
+
+      {# ── 1. Basic info ── #}
+      <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold d-flex align-items-center gap-2">
+          <i class="bi bi-person-fill text-success"></i>Personal &amp; Farm Info
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('farmer.profile') }}">
+            <input type="hidden" name="action" value="update_info">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Full Name <span class="text-danger">*</span></label>
+                <input type="text" name="name" class="form-control"
+                       value="{{ current_user.name }}" required maxlength="120">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Farm Name <span class="text-muted fw-normal">(optional)</span></label>
+                <input type="text" name="farm_name" class="form-control"
+                       value="{{ current_user.farm_name or '' }}" maxlength="200"
+                       placeholder="e.g. Sunrise Valley Farm">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Phone Number</label>
+                <input type="tel" name="phone" class="form-control"
+                       value="{{ current_user.phone or '' }}" maxlength="30"
+                       placeholder="e.g. (505) 555-0100">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Location / Address</label>
+                <input type="text" name="location" class="form-control"
+                       value="{{ current_user.location or '' }}" maxlength="200"
+                       placeholder="e.g. Albuquerque, NM">
+                <div class="form-text">Used for nearest facility calculations.</div>
+              </div>
+            </div>
+            <div class="mt-3 text-end">
+              <button type="submit" class="btn btn-success px-4">
+                <i class="bi bi-check2 me-1"></i>Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {# ── 2. Change email ── #}
+      <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold d-flex align-items-center gap-2">
+          <i class="bi bi-envelope-fill text-primary"></i>Change Email Address
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('farmer.profile') }}">
+            <input type="hidden" name="action" value="change_email">
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label class="form-label fw-semibold small">Current Email</label>
+                <input type="text" class="form-control bg-light" value="{{ current_user.email }}" disabled>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">New Email Address <span class="text-danger">*</span></label>
+                <input type="email" name="new_email" class="form-control" required
+                       placeholder="new@example.com" maxlength="150">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Confirm with Current Password <span class="text-danger">*</span></label>
+                <input type="password" name="confirm_password_email" class="form-control" required
+                       placeholder="Enter your current password">
+              </div>
+            </div>
+            <div class="mt-3 text-end">
+              <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-envelope-check me-1"></i>Update Email
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {# ── 3. Change password ── #}
+      <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold d-flex align-items-center gap-2">
+          <i class="bi bi-shield-lock-fill text-warning"></i>Change Password
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('farmer.profile') }}">
+            <input type="hidden" name="action" value="change_password">
+            <div class="row g-3">
+              <div class="col-md-12">
+                <label class="form-label fw-semibold small">Current Password <span class="text-danger">*</span></label>
+                <input type="password" name="current_password" class="form-control" required
+                       placeholder="Enter your current password">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">New Password <span class="text-danger">*</span></label>
+                <input type="password" name="new_password" class="form-control" required
+                       placeholder="Minimum 8 characters" minlength="8">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Confirm New Password <span class="text-danger">*</span></label>
+                <input type="password" name="confirm_password" class="form-control" required
+                       placeholder="Repeat new password">
+              </div>
+            </div>
+            <div class="mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <span class="text-muted small">
+                <i class="bi bi-info-circle me-1"></i>Minimum 8 characters. You'll stay logged in after changing.
+              </span>
+              <button type="submit" class="btn btn-warning px-4">
+                <i class="bi bi-lock-fill me-1"></i>Change Password
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {# ── 4. Account stats (read-only) ── #}
+      <div class="card shadow-sm border-0 bg-light">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-3"><i class="bi bi-bar-chart-fill me-2 text-secondary"></i>Account Activity</h6>
+          <div class="row g-3 text-center">
+            <div class="col-6 col-md-3">
+              <div class="fw-bold fs-4 text-success">
+                {{ current_user.soil_tests | selectattr('status', 'equalto', 'completed') | list | length }}
+              </div>
+              <div class="text-muted small">Completed Tests</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="fw-bold fs-4 text-warning">
+                {{ current_user.soil_tests | selectattr('status', 'equalto', 'pending') | list | length }}
+              </div>
+              <div class="text-muted small">Pending Tests</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="fw-bold fs-4 text-info">
+                {{ current_user.soil_tests | list | length }}
+              </div>
+              <div class="text-muted small">Total Tests</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="fw-bold fs-4 text-secondary">
+                {{ current_user.created_at.strftime('%Y') }}
+              </div>
+              <div class="text-muted small">Joined</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  {# ── Subscription ── #}
+  <div class="row justify-content-center mt-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0">
+        <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div>
+            <h6 class="fw-semibold mb-1"><i class="bi bi-stars text-warning me-2"></i>Subscription</h6>
+            {% if current_user.is_subscribed %}
+            <span class="badge bg-success">Pro — Active</span>
+            {% else %}
+            <span class="badge bg-secondary">Free plan</span>
+            <span class="text-muted small ms-2">Upgrade to unlock Water Guide &amp; Amendment Calculator</span>
+            {% endif %}
+          </div>
+          {% if current_user.is_subscribed %}
+          <form method="POST" action="{{ url_for('farmer.cancel_subscription') }}"
+                onsubmit="return confirm('Cancel your Pro subscription?')">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Cancel Subscription</button>
+          </form>
+          {% else %}
+          <a href="{{ url_for('farmer.upgrade') }}" class="btn btn-success btn-sm fw-semibold">
+            <i class="bi bi-lightning-fill me-1"></i>Upgrade to Pro
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

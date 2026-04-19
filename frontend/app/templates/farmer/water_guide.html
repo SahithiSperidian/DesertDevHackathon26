@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+{% block title %}Water Guide — CropPulse{% endblock %}
+
+{% block content %}
+{# ── Page header ── #}
+<div class="gu-dashboard-header">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="bi bi-droplet-half me-2"></i>Water Use Guide</h2>
+    <p class="mb-0 opacity-75">
+      Crop-specific irrigation needs · Storage methods · Benefits of water reuse
+      &mdash; tailored to <strong>New Mexico</strong> conditions
+    </p>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  {# ══════════════════════════════════════════════════════
+     ROW 1 — Live condition banners
+  ══════════════════════════════════════════════════════ #}
+  <div class="row g-3 mb-4">
+
+    {# Water stress card #}
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi {{ guide.stress_adj.icon }} text-{{ guide.stress_adj.color }} fs-4"></i>
+            <div class="fw-semibold">River Water Stress</div>
+          </div>
+          <div class="d-flex align-items-end gap-2 mb-2">
+            <div class="display-6 fw-bold text-{{ guide.stress_adj.color }}">{{ guide.stress_score }}</div>
+            <div class="text-muted small mb-1">/ 100</div>
+            <span class="badge bg-{{ guide.stress_adj.color }} ms-1">{{ guide.stress_adj.label }}</span>
+          </div>
+          {# Stress bar #}
+          <div class="progress mb-2" style="height:8px;">
+            <div class="progress-bar bg-{{ guide.stress_adj.color }}"
+                 style="width:{{ guide.stress_score }}%"></div>
+          </div>
+          <div class="small text-muted">{{ guide.stress_adj.tip }}</div>
+          {% if guide.flow_cfs %}
+          <div class="small text-muted mt-1">
+            <i class="bi bi-activity me-1"></i>
+            Current Rio Grande flow: <strong>{{ "%.0f"|format(guide.flow_cfs) }} cfs</strong>
+            (USGS site 08330000)
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {# Drought card #}
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-thermometer-sun fs-4" style="color:{{ guide.drought_color }};"></i>
+            <div class="fw-semibold">Drought Status</div>
+          </div>
+          <div class="mb-2">
+            <span class="badge fs-6 px-3 py-2"
+                  style="background:{{ guide.drought_color }}; color:#fff;">
+              {{ guide.drought_label }}
+            </span>
+          </div>
+          {% if guide.drought_adv %}
+          <div class="alert alert-{{ guide.drought_adv.color }} border-0 py-2 small mb-0">
+            {{ guide.drought_adv.text }}
+          </div>
+          {% else %}
+          <div class="small text-muted mt-1">No drought conditions currently active. Monitor weekly during summer.</div>
+          {% endif %}
+          <div class="small text-muted mt-2">
+            <i class="bi bi-geo-alt me-1"></i>Bernalillo County, NM — US Drought Monitor
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Soil water retention card #}
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi {{ guide.retention.icon }} text-{{ guide.retention.color }} fs-4"></i>
+            <div class="fw-semibold">Soil Water Retention</div>
+          </div>
+          <div class="d-flex align-items-end gap-2 mb-2">
+            <div class="display-6 fw-bold text-{{ guide.retention.color }}">{{ guide.om_pct }}</div>
+            <div class="text-muted small mb-1">% OM</div>
+            <span class="badge bg-{{ guide.retention.color }} ms-1">{{ guide.retention.tier }}</span>
+          </div>
+          <div class="small text-muted mb-2">{{ guide.retention.desc }}</div>
+          <div class="alert alert-{{ guide.retention.color }} border-0 py-2 small mb-0">
+            <i class="bi bi-clock me-1"></i>{{ guide.retention.frequency_tip }}
+          </div>
+          {% if not has_soil_test %}
+          <div class="small text-muted mt-2">
+            <i class="bi bi-info-circle me-1"></i>
+            <a href="{{ url_for('farmer.soil_test') }}">Complete a soil test</a> for personalised retention data.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {# Elephant Butte Reservoir card #}
+    <div class="col-12 col-md-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3">
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-water text-{{ guide.reservoir.status_color }} fs-4"></i>
+            <div class="fw-semibold">Elephant Butte Reservoir</div>
+          </div>
+
+          {% if guide.reservoir.source == 'unavailable' %}
+            <div class="text-muted small">Data temporarily unavailable. Check
+              <a href="https://www.usbr.gov/uc/water/crsp/cs/ebt.html" target="_blank" rel="noopener">BOR directly</a>.
+            </div>
+          {% else %}
+            <div class="d-flex align-items-end gap-2 mb-1">
+              <div class="display-6 fw-bold text-{{ guide.reservoir.status_color }}">
+                {{ guide.reservoir.pct_full }}%
+              </div>
+              <span class="badge bg-{{ guide.reservoir.status_color }} mb-1">
+                {{ guide.reservoir.status }}
+              </span>
+            </div>
+
+            {# Reservoir fill bar #}
+            <div class="progress mb-2" style="height:8px;">
+              <div class="progress-bar bg-{{ guide.reservoir.status_color }}"
+                   style="width:{{ [guide.reservoir.pct_full, 100]|min }}%"></div>
+            </div>
+
+            <div class="small text-muted mb-1">
+              <strong>{{ guide.reservoir.storage_af_fmt }}</strong> ac-ft stored
+              of {{ "{:,}".format(guide.reservoir.full_capacity) }} ac-ft capacity
+            </div>
+
+            {# 7-day trend #}
+            {% if guide.reservoir.delta_7d is not none %}
+              <div class="small mb-2">
+                <i class="bi {{ guide.reservoir.direction_icon }}
+                   {% if guide.reservoir.direction == 'rising' %}text-success
+                   {% elif guide.reservoir.direction == 'falling' %}text-danger
+                   {% else %}text-secondary{% endif %} me-1"></i>
+                {% if guide.reservoir.delta_7d > 0 %}+{% endif %}{{ "{:,}".format(guide.reservoir.delta_7d) }} ac-ft (7 days)
+              </div>
+            {% endif %}
+
+            {# Mini sparkline using inline SVG bar chart #}
+            {% if guide.reservoir.sparkline|length > 1 %}
+            <div class="mt-1" title="30-day storage trend (oldest→newest)">
+              {%- set spark = guide.reservoir.sparkline -%}
+              {%- set s_min = spark|min -%}
+              {%- set s_max = spark|max -%}
+              {%- set s_range = (s_max - s_min) if s_max != s_min else 1 -%}
+              <svg width="100%" height="28" viewBox="0 0 {{ spark|length * 4 }} 28"
+                   preserveAspectRatio="none" style="display:block;">
+                {% for v in spark %}
+                  {%- set bar_h = ((v - s_min) / s_range * 22)|round|int + 2 -%}
+                  <rect x="{{ loop.index0 * 4 + 1 }}" y="{{ 28 - bar_h }}"
+                        width="3" height="{{ bar_h }}"
+                        fill="{% if guide.reservoir.direction == 'rising' %}#198754{% elif guide.reservoir.direction == 'falling' %}#dc3545{% else %}#6c757d{% endif %}"
+                        opacity="0.75"/>
+                {% endfor %}
+              </svg>
+            </div>
+            {% endif %}
+
+            <div class="small text-muted mt-1">
+              <i class="bi bi-calendar3 me-1"></i>{{ guide.reservoir.date }}
+              &nbsp;·&nbsp;
+              <span class="badge {% if guide.reservoir.source == 'bor_rise' %}bg-primary{% else %}bg-secondary{% endif %}"
+                    style="font-size:0.6rem;">
+                {% if guide.reservoir.source == 'bor_rise' %}BOR RISE live{% else %}cached{% endif %}
+              </span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ══════════════════════════════════════════════════════
+     SECTION 1 — Crop water table
+  ══════════════════════════════════════════════════════ #}
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold border-bottom d-flex flex-wrap align-items-center gap-2">
+      <i class="bi bi-table text-primary"></i> How Much Water Does Each Crop Need?
+      <span class="ms-auto text-muted small fw-normal">
+        Base &minus; {{ guide.rainfall_offset }} seasonal rainfall = net irrigation required
+        {% if guide.rainfall_data.source == 'noaa' %}
+          <span class="badge bg-success ms-1" style="font-size:0.65rem;"><i class="bi bi-cloud-rain me-1"></i>NOAA live — {{ guide.rainfall_data.city }}</span>
+        {% else %}
+          <span class="badge bg-secondary ms-1" style="font-size:0.65rem;">NM avg</span>
+        {% endif %}
+      </span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 small">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-3">Crop</th>
+              <th class="text-center d-none d-sm-table-cell">Need</th>
+              <th class="text-center">Base<br>
+                <span class="fw-normal text-muted">
+                  (ET×Kc in/season
+                  {% if guide.et_method == 'penman-monteith' %}
+                    <span class="badge bg-primary ms-1" style="font-size:0.6rem;">PM</span>
+                  {% elif guide.et_method == 'hargreaves' %}
+                    <span class="badge bg-info text-dark ms-1" style="font-size:0.6rem;">HS</span>
+                  {% else %}
+                    <span class="badge bg-secondary ms-1" style="font-size:0.6rem;">NMSU</span>
+                  {% endif %}
+                  )
+                </span>
+              </th>
+              <th class="text-center d-none d-md-table-cell">Adjusted<br><span class="fw-normal text-muted">(soil + stress)</span></th>
+              <th class="text-center">Net Irrigation<br><span class="fw-normal text-muted">(in / gal per acre)</span></th>
+              <th class="text-center d-none d-sm-table-cell">Best Method</th>
+              <th class="text-center">Risk</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in guide.crop_table %}
+            <tr>
+              <td class="ps-3 fw-medium">
+                <span class="me-1">{{ row.emoji }}</span>{{ row.name }}
+              </td>
+              <td class="text-center d-none d-sm-table-cell">
+                <span class="badge bg-secondary bg-opacity-10 text-secondary">{{ row.need }}</span>
+              </td>
+              <td class="text-center">{{ row.base_in }}"</td>
+              <td class="text-center d-none d-md-table-cell">
+                {% if row.adjusted_in != row.base_in %}
+                  <span class="text-{{ 'danger' if row.adjusted_in > row.base_in else 'success' }}">
+                    {{ row.adjusted_in }}"
+                  </span>
+                {% else %}
+                  {{ row.adjusted_in }}"
+                {% endif %}
+              </td>
+              <td class="text-center">
+                <strong>{{ row.net_in }}"</strong>
+                <div class="text-muted" style="font-size:0.7rem;">{{ row.net_gal }} gal</div>
+              </td>
+              <td class="text-center d-none d-sm-table-cell">
+                <span class="badge bg-{{ row.method_color }} text-white">
+                  <i class="bi {{ row.method_icon }} me-1"></i>{{ row.method }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="badge bg-{{ row.urgency_color }}">{{ row.urgency }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer bg-white border-top text-muted small py-2 px-3">
+      <i class="bi bi-info-circle me-1"></i>
+      Adjusted values account for your soil's organic-matter retention
+      ({{ guide.retention.adjustment_pct | abs }}%
+      {{ 'reduction' if guide.retention.adjustment_pct < 0 else ('addition' if guide.retention.adjustment_pct > 0 else 'no change') }})
+      and current river-stress level
+      ({{ guide.stress_adj.pct | abs }}%
+      {{ 'reduction' if guide.stress_adj.pct < 0 else ('addition' if guide.stress_adj.pct > 0 else 'no change') }}).
+      Net irrigation subtracts {{ guide.rainfall_offset }} of seasonal rainfall
+      {% if guide.rainfall_data.source == 'noaa' %}
+        (NOAA 30-yr normals, {{ guide.rainfall_data.city }})
+      {% else %}
+        (NM historical average — update your profile city for a local figure)
+      {% endif %}.
+      Base inches calculated via
+      {% if guide.et_method == 'penman-monteith' %}
+        <strong>ASCE Penman-Monteith ETo × FAO-56 Kc</strong> using NOAA temperature, dew point &amp; wind normals.
+      {% elif guide.et_method == 'hargreaves' %}
+        <strong>Hargreaves-Samani ETo × FAO-56 Kc</strong> (temperature-based, NM arid calibration).
+      {% else %}
+        NMSU Cooperative Extension published guidelines (static values).
+      {% endif %}
+    </div>
+  </div>
+
+  {# ══════════════════════════════════════════════════════
+     SECTION 2 — Water storage methods
+  ══════════════════════════════════════════════════════ #}
+  <h5 class="fw-bold mb-3 mt-2">
+    <i class="bi bi-bucket-fill text-info me-2"></i>Water Storage Methods for NM Farms
+  </h5>
+  <div class="row g-3 mb-4">
+    {% for method in guide.storage_methods %}
+    <div class="col-12 col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom d-flex align-items-center gap-2 py-2">
+          <span class="rounded-circle d-inline-flex align-items-center justify-content-center"
+                style="width:36px;height:36px;background:rgba(var(--bs-{{ method.color }}-rgb),0.12);">
+            <i class="bi {{ method.icon }} text-{{ method.color }}"></i>
+          </span>
+          <div class="fw-semibold">{{ method.title }}</div>
+          {% if method.nm_legal %}
+          <span class="badge text-success ms-auto small" style="background:rgba(25,135,84,0.12);">
+            <i class="bi bi-check-circle me-1"></i>Legal in NM
+          </span>
+          {% endif %}
+        </div>
+        <div class="card-body p-3">
+          <p class="small text-muted mb-3">{{ method.desc }}</p>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <div class="bg-light rounded p-2 text-center">
+                <div class="text-muted" style="font-size:0.65rem;">CAPACITY</div>
+                <div class="fw-semibold small">{{ method.capacity_range }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="bg-light rounded p-2 text-center">
+                <div class="text-muted" style="font-size:0.65rem;">INSTALL COST</div>
+                <div class="fw-semibold small">{{ method.install_cost }}</div>
+              </div>
+            </div>
+          </div>
+
+          {% if method.nm_note %}
+          <div class="alert alert-success border-0 py-2 small mb-3">
+            <i class="bi bi-journal-text me-1"></i>{{ method.nm_note }}
+          </div>
+          {% endif %}
+
+          <div class="fw-semibold small mb-2 text-{{ method.color }}">
+            <i class="bi bi-list-check me-1"></i>How to set it up
+          </div>
+          <ol class="small text-muted ps-3 mb-0">
+            {% for step in method.steps %}
+            <li class="mb-1">{{ step }}</li>
+            {% endfor %}
+          </ol>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# ══════════════════════════════════════════════════════
+     SECTION 3 — Benefits of storing & reusing water
+  ══════════════════════════════════════════════════════ #}
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold border-bottom d-flex align-items-center gap-2">
+      <i class="bi bi-stars text-warning"></i> Why Store and Reuse Water?
+    </div>
+    <div class="card-body p-3">
+      <div class="row g-3">
+        {% for b in guide.reuse_benefits %}
+        <div class="col-12 col-sm-6 col-xl-4">
+          <div class="d-flex gap-3 h-100 p-3 rounded border border-light bg-white shadow-sm">
+            <div class="flex-shrink-0">
+              <span class="rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width:44px;height:44px;background:rgba(var(--bs-{{ b.color }}-rgb),0.12);">
+                <i class="bi {{ b.icon }} text-{{ b.color }} fs-5"></i>
+              </span>
+            </div>
+            <div>
+              <div class="fw-semibold mb-1">{{ b.title }}</div>
+              <div class="text-{{ b.color }} fw-bold fs-5 mb-1">
+                {{ b.stat }}
+                <span class="text-muted fs-6 fw-normal">{{ b.stat_label }}</span>
+              </div>
+              <div class="small text-muted">{{ b.detail }}</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {# ══════════════════════════════════════════════════════
+     SECTION 4 — Quick action links
+  ══════════════════════════════════════════════════════ #}
+  <div class="card border-0 shadow-sm bg-light mb-2">
+    <div class="card-body p-3">
+      <div class="fw-semibold mb-3"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Next Steps</div>
+      <div class="row g-2">
+        <div class="col-12 col-sm-6 col-md-3">
+          <a href="{{ url_for('farmer.soil_test') }}" class="btn btn-outline-success w-100 d-flex align-items-center gap-2">
+            <i class="bi bi-flower2"></i>
+            <span>Book / manage soil tests</span>
+          </a>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+          <a href="{{ url_for('farmer.soil_resources') }}" class="btn btn-outline-primary w-100 d-flex align-items-center gap-2">
+            <i class="bi bi-recycle"></i>
+            <span>EPA soil resources near me</span>
+          </a>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+          <a href="https://www.nrcs.usda.gov/programs-initiatives/eqip-environmental-quality-incentives"
+             target="_blank" rel="noopener"
+             class="btn btn-outline-info w-100 d-flex align-items-center gap-2">
+            <i class="bi bi-box-arrow-up-right"></i>
+            <span>USDA EQIP cost-share</span>
+          </a>
+        </div>
+        <div class="col-12 col-sm-6 col-md-3">
+          <a href="https://nmacequia.org" target="_blank" rel="noopener"
+             class="btn btn-outline-secondary w-100 d-flex align-items-center gap-2">
+            <i class="bi bi-box-arrow-up-right"></i>
+            <span>NM Acequia Association</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-muted small text-center mt-2">
+    <i class="bi bi-database me-1"></i>
+    Water stress: USGS National Water Information System (site 08330000) ·
+    Drought: US Drought Monitor (FIPS 35001) ·
+    Crop irrigation: NMSU Cooperative Extension ·
+    NM Rainfall: NOAA 30-year climate normals
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}My Facility Contacts — CropPulse{% endblock %}
+
+{% block content %}
+<div class="gu-dashboard-header">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="bi bi-building me-2"></i>My Facility Contacts</h2>
+    <p class="mb-2 opacity-75">Soil resource facilities you've connected with via CropPulse</p>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('farmer.dashboard') }}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4" style="max-width: 900px;">
+
+  {# ── Summary KPIs ── #}
+  {% set closed = referrals | selectattr('status', 'equalto', 'deal_closed') | list %}
+  {% set total_deal_value = closed | sum(attribute='deal_value_usd') %}
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4">
+      <div class="gu-kpi-card h-100 text-center">
+        <div class="text-muted small">Facilities Contacted</div>
+        <div class="gu-kpi-number">{{ referrals|length }}</div>
+        <div class="text-muted small">total connections</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4">
+      <div class="gu-kpi-card h-100 text-center">
+        <div class="text-muted small">Deals Closed</div>
+        <div class="gu-kpi-number text-success">{{ closed|length }}</div>
+        <div class="text-muted small">completed agreements</div>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="gu-kpi-card h-100 text-center">
+        <div class="text-muted small">Total Deal Value</div>
+        <div class="gu-kpi-number text-success">
+          {% if total_deal_value %}${{ "{:,.0f}".format(total_deal_value) }}{% else %}—{% endif %}
+        </div>
+        <div class="text-muted small">across closed deals</div>
+      </div>
+    </div>
+  </div>
+
+  {% if not referrals %}
+  <div class="card border-0 shadow-sm">
+    <div class="card-body text-center py-5 text-muted">
+      <i class="bi bi-building fs-1 d-block mb-3 opacity-50"></i>
+      <p class="mb-3">You haven't contacted any facilities yet.</p>
+      <a href="{{ url_for('farmer.soil_resources') }}" class="btn btn-success">
+        <i class="bi bi-recycle me-1"></i>Browse Soil Resources
+      </a>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white fw-semibold border-bottom d-flex align-items-center gap-2">
+      <i class="bi bi-list-check text-success"></i> Contact History
+      <span class="ms-auto badge bg-success-subtle text-success">{{ referrals|length }} total</span>
+    </div>
+    <div class="list-group list-group-flush">
+      {% for r in referrals %}
+      <div class="list-group-item px-4 py-3">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div>
+            <div class="fw-semibold">{{ r.facility_name }}</div>
+            <div class="text-muted small mt-1">
+              <span class="badge bg-secondary text-white me-1">{{ r.facility_type }}</span>
+              {% if r.facility_city %}<i class="bi bi-geo-alt me-1"></i>{{ r.facility_city }}{% endif %}
+              &nbsp;&middot;&nbsp;
+              <i class="bi bi-calendar3 me-1"></i>Contacted {{ r.referred_at.strftime('%b %d, %Y') }}
+            </div>
+          </div>
+          <div class="text-end">
+            {% if r.status == 'deal_closed' %}
+              <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i>Deal Closed</span>
+              {% if r.closed_at %}<div class="text-muted small mt-1">{{ r.closed_at.strftime('%b %d, %Y') }}</div>{% endif %}
+            {% else %}
+              <span class="badge bg-warning text-dark px-3 py-2"><i class="bi bi-hourglass-split me-1"></i>In Progress</span>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if r.status == 'deal_closed' and r.deal_value_usd %}
+        <div class="mt-2 d-inline-block rounded border border-success bg-success bg-opacity-10 px-3 py-2 small">
+          <i class="bi bi-currency-dollar text-success me-1"></i>
+          <strong class="text-success">Deal value: ${{ "{:,.0f}".format(r.deal_value_usd) }}</strong>
+        </div>
+        {% endif %}
+
+        {% if r.status != 'deal_closed' %}
+        <form method="POST" action="{{ url_for('farmer.close_deal', referral_id=r.id) }}"
+              class="d-flex gap-2 align-items-end flex-wrap mt-2">
+          <div>
+            <label class="form-label small fw-semibold text-dark mb-1">
+              <i class="bi bi-check2-circle me-1"></i>Closed a deal? Enter the agreed value ($)
+            </label>
+            <input type="number" name="deal_value_usd" class="form-control form-control-sm"
+                   placeholder="e.g. 500" min="0" step="1" style="width:160px;" required>
+          </div>
+          <button type="submit" class="btn btn-success btn-sm">
+            <i class="bi bi-check-lg me-1"></i>Mark as Closed
+          </button>
+        </form>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mt-3 text-end">
+    <a href="{{ url_for('farmer.soil_resources') }}" class="btn btn-outline-success btn-sm">
+      <i class="bi bi-plus-lg me-1"></i>Connect with another facility
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

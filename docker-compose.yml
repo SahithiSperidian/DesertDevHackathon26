@@ -1,0 +1,10 @@
+services:
+  web:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./backend/.env        # secrets loaded here — never baked into the image
+    volumes:
+      - ./backend/instance:/app/instance   # persist SQLite DB across restarts
+    restart: unless-stopped

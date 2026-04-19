@@ -1,0 +1,414 @@
+/* =============================================
+   CropPulse — Global Styles
+   ============================================= */
+
+:root {
+  --gu-green:       #2d6a4f;
+  --gu-green-light: #40916c;
+  --gu-green-pale:  #d8f3dc;
+  --gu-brown:       #6b4226;
+  --gu-sand:        #f4e9d9;
+  --gu-dark:        #1a1a2e;
+  --gu-text:        #2c2c2c;
+  --gu-muted:       #6c757d;
+  --gu-radius:      14px;
+  --gu-shadow:      0 4px 24px rgba(0,0,0,0.08);
+}
+
+/* ---- Base ---- */
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--gu-text);
+  background: #f8faf8;
+}
+
+/* ---- Navbar ---- */
+.gu-navbar {
+  background: var(--gu-green) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+
+.gu-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* ---- Hero ---- */
+.gu-hero {
+  min-height: 82vh;
+  background:
+    linear-gradient(160deg, rgba(45,106,79,0.92) 0%, rgba(27,67,50,0.97) 100%),
+    url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=1600&auto=format&fit=crop')
+    center/cover no-repeat;
+}
+
+.gu-hero-eyebrow {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  opacity: 0.7;
+  margin-bottom: 0.5rem;
+}
+
+.gu-hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.gu-hero-sub {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  max-width: 560px;
+  margin: 1rem auto 0;
+}
+
+/* ---- Stats bar ---- */
+.gu-stats-bar {
+  background: var(--gu-green);
+  color: #fff;
+}
+
+.gu-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gu-stat-number {
+  font-size: 1.9rem;
+  font-weight: 700;
+  font-family: 'Playfair Display', serif;
+}
+
+.gu-stat-label {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* ---- Feature cards ---- */
+.gu-feature-card {
+  background: #fff;
+  border-radius: var(--gu-radius);
+  padding: 2rem;
+  box-shadow: var(--gu-shadow);
+  border: 1px solid #e8f4ed;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.gu-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+}
+
+.gu-feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+}
+
+.gu-feature-list li {
+  padding: 6px 0;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.gu-feature-list li:last-child {
+  border-bottom: none;
+}
+
+/* ---- CTA section ---- */
+.gu-cta-section {
+  background: linear-gradient(135deg, var(--gu-green) 0%, var(--gu-green-light) 100%);
+}
+
+/* ---- Auth pages ---- */
+.gu-auth-wrapper {
+  min-height: calc(100vh - 70px);
+}
+
+.gu-auth-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--gu-green);
+}
+
+.gu-auth-card {
+  background: #fff;
+  border-radius: var(--gu-radius);
+  padding: 2rem 2.2rem;
+  box-shadow: var(--gu-shadow);
+  border: 1px solid #e8f4ed;
+}
+
+.gu-input {
+  border-left: none !important;
+  border-radius: 0 8px 8px 0 !important;
+}
+
+.gu-input:focus {
+  box-shadow: none !important;
+  border-color: var(--gu-green-light) !important;
+}
+
+.gu-input-icon {
+  background: #f8faf8;
+  border-right: none;
+  border-radius: 8px 0 0 8px !important;
+  color: var(--gu-muted);
+}
+
+.gu-pw-toggle {
+  border: 1px solid #dee2e6;
+  border-left: none;
+  background: #f8faf8;
+  border-radius: 0 8px 8px 0;
+  color: var(--gu-muted);
+}
+
+.gu-pw-toggle:hover {
+  background: #e8f4ed;
+}
+
+/* ---- Password strength bar ---- */
+.gu-pw-strength {
+  height: 4px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.gu-pw-strength-bar {
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s, background-color 0.3s;
+  border-radius: 4px;
+}
+
+/* ---- Role pills ---- */
+.gu-role-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 1.4rem;
+  border-radius: 50px;
+  border: 2px solid var(--gu-green);
+  background: transparent;
+  color: var(--gu-green);
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.gu-role-pill:hover {
+  background: var(--gu-green-pale);
+}
+
+.gu-role-pill.active {
+  background: var(--gu-green);
+  color: #fff;
+}
+
+/* ---- Primary button ---- */
+.gu-btn-primary {
+  background: var(--gu-green) !important;
+  border-color: var(--gu-green) !important;
+  color: #fff !important;
+  border-radius: 10px;
+  padding: 0.65rem 1.2rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.gu-btn-primary:hover:not(:disabled) {
+  background: var(--gu-green-light) !important;
+  border-color: var(--gu-green-light) !important;
+  transform: translateY(-1px);
+}
+
+.gu-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---- Divider ---- */
+.gu-divider {
+  border-color: #e8f4ed;
+}
+
+/* ---- Footer ---- */
+.gu-footer {
+  background: #fff;
+  border-top: 1px solid #e8f4ed;
+}
+
+/* ---- Dashboard stubs ---- */
+.gu-dashboard-header {
+  background: var(--gu-green);
+  color: #fff;
+  padding: 2.5rem 0 2rem;
+}
+
+.gu-kpi-card {
+  background: #fff;
+  border-radius: var(--gu-radius);
+  padding: 1.5rem;
+  box-shadow: var(--gu-shadow);
+  border-left: 4px solid var(--gu-green);
+  transition: transform 0.2s;
+}
+
+.gu-kpi-card:hover {
+  transform: translateY(-3px);
+}
+
+.gu-kpi-number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gu-green);
+  font-family: 'Playfair Display', serif;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 576px) {
+  .gu-auth-card {
+    padding: 1.5rem 1.2rem;
+  }
+  .gu-hero-title {
+    font-size: 2.2rem;
+  }
+  /* Dashboard mobile fixes */
+  .gu-dashboard-header {
+    padding: 1.5rem 0 1.2rem;
+  }
+  .gu-kpi-number {
+    font-size: 1.5rem;
+  }
+  .gu-kpi-card {
+    padding: 1rem;
+  }
+  #soil-trend-chart {
+    height: 300px !important;
+  }
+  /* Prevent long price-alert badge from overflowing */
+  #price-alerts-section .card-header .badge {
+    font-size: 0.68rem;
+    white-space: normal;
+    text-align: right;
+  }
+}
+
+/* =============================================
+   Soil Test Pages
+   ============================================= */
+
+/* Centre selection list */
+.gu-centre-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.gu-centre-option {
+  display: block;
+  padding: 14px 16px;
+  border: 2px solid #e8f4ed;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  background: #fafafa;
+}
+
+.gu-centre-option:hover {
+  border-color: var(--gu-green-light);
+  background: #f0faf4;
+}
+
+.gu-centre-option.selected {
+  border-color: var(--gu-green);
+  background: #e8f4ed;
+}
+
+/* Hide check icon on non-selected */
+.gu-centre-option .gu-check-icon {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.gu-centre-option.selected .gu-check-icon {
+  opacity: 1;
+}
+
+/* pH scale */
+.gu-ph-scale {
+  padding: 4px 0;
+}
+
+.gu-ph-track {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(to right,
+    #e74c3c 0%,        /* pH 3 — acidic */
+    #e67e22 20%,
+    #f1c40f 35%,
+    #2ecc71 43%,       /* pH 6 — sweet spot start */
+    #27ae60 57%,       /* pH 7.5 — sweet spot end */
+    #3498db 70%,
+    #2980b9 100%       /* pH 10 — alkaline */
+  );
+  margin: 6px 0 4px;
+}
+
+/* Sweet spot highlight */
+.gu-ph-sweet {
+  position: absolute;
+  top: -2px;
+  left: 43%;
+  width: 14%;            /* 6.0–7.5 on 3–10 scale */
+  height: 16px;
+  border: 2px solid var(--gu-green);
+  border-radius: 4px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.gu-ph-marker {
+  display: none;
+  position: absolute;
+  top: -5px;
+  width: 4px;
+  height: 22px;
+  background: #1a1a2e;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.gu-ph-label {
+  position: absolute;
+  bottom: -18px;
+  font-size: 0.7rem;
+  color: var(--gu-muted);
+  transform: translateX(-50%);
+}
+
+/* Nutrient bars */
+.gu-nutrient-bar {
+  height: 6px;
+  border-radius: 4px;
+  background: #e9ecef;
+  transition: width 0.3s, background 0.3s;
+}
+

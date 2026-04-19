@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}Soil Test — CropPulse{% endblock %}
+
+{% block content %}
+<div class="gu-dashboard-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-2" style="--bs-breadcrumb-divider-color: rgba(255,255,255,0.5); opacity:.8">
+        <li class="breadcrumb-item"><a href="{{ url_for('farmer.dashboard') }}" class="text-white">Dashboard</a></li>
+        <li class="breadcrumb-item active text-white">Soil Test</li>
+      </ol>
+    </nav>
+    <h2 class="fw-bold mb-1"><i class="bi bi-flower2 me-2"></i>Soil Testing</h2>
+    <p class="mb-0 opacity-75">Book a soil test at a New Mexico Extension office or lab.</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+
+    <!-- LEFT: booking form -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-success text-white fw-semibold d-flex align-items-center justify-content-between">
+          <span><i class="bi bi-calendar2-plus me-2"></i>Book a Soil Test</span>
+          {% set total = tests|length %}
+          {% set free_limit = 5 if current_user.is_subscribed else 1 %}
+          {% set remaining = [free_limit - total, 0]|max %}
+          <span class="badge bg-white text-success fw-semibold">
+            {{ remaining }} free test{{ 's' if remaining != 1 }} remaining
+          </span>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('farmer.book_soil_test') }}">
+
+            <div class="mb-3">
+              <label class="form-label fw-medium">Your farm / field location</label>
+              <div class="input-group">
+                <span class="input-group-text gu-input-icon"><i class="bi bi-geo-alt"></i></span>
+                <input type="text" class="form-control gu-input" name="location"
+                  placeholder="e.g. South Valley, Albuquerque NM"
+                  value="{{ current_user.location or '' }}" />
+              </div>
+              <small class="text-muted">Helps the lab interpret results for your area.</small>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label fw-medium">Select a test centre</label>
+              <div class="gu-centre-list" id="centreList">
+                {% for c in centres %}
+                <label class="gu-centre-option {{ 'selected' if loop.first }}" for="centre_{{ c.id }}">
+                  <input class="d-none" type="radio" name="centre_id" id="centre_{{ c.id }}"
+                    value="{{ c.id }}" {{ 'checked' if loop.first }} />
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <div class="fw-semibold">{{ c.name }}</div>
+                      <div class="text-muted small mt-1"><i class="bi bi-pin-map me-1"></i>{{ c.address }}</div>
+                      <div class="mt-1">
+                        {% set total = tests|length %}
+                        {% set free_limit = 5 if current_user.is_subscribed else 1 %}
+                        {% if total < free_limit %}
+                          <span class="badge bg-success-subtle text-success me-1">Free (quota)</span>
+                        {% else %}
+                          <span class="badge bg-warning text-dark me-1">{{ c.cost }} (lab fee applies)</span>
+                        {% endif %}
+                        <span class="badge bg-secondary-subtle text-secondary">{{ c.turnaround }}</span>
+                      </div>
+                    </div>
+                    <i class="bi bi-check-circle-fill text-success gu-check-icon mt-1"></i>
+                  </div>
+                  <div class="mt-2">
+                    {% for t in c.tests %}
+                      <span class="badge bg-light text-dark border me-1 mb-1">{{ t }}</span>
+                    {% endfor %}
+                  </div>
+                </label>
+                {% endfor %}
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 gu-btn-primary">
+              <i class="bi bi-send me-2"></i>Book Soil Test
+            </button>
+            <p class="text-center text-muted small mt-2">
+              You'll receive a kit by mail or visit the office with a sample.
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: my tests list -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-semibold border-bottom d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-list-check me-2 text-success"></i>My Soil Tests</span>
+          <span class="badge bg-success-subtle text-success">{{ tests|length }} total</span>
+        </div>
+        <div class="card-body p-0">
+          {% if not tests %}
+            <div class="text-center text-muted py-5">
+              <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+              No soil tests yet. Book your first one to get crop suggestions.
+            </div>
+          {% else %}
+            <div class="list-group list-group-flush">
+              {% for test in tests %}
+              <div class="list-group-item px-4 py-3">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                  <div>
+                    <div class="fw-semibold">{{ test.test_center }}</div>
+                    <div class="text-muted small mt-1">
+                      <i class="bi bi-geo-alt me-1"></i>{{ test.location or 'Location not set' }}
+                      &nbsp;&middot;&nbsp;
+                      <i class="bi bi-calendar3 me-1"></i>{{ test.created_at.strftime('%b %d, %Y') }}
+                    </div>
+                  </div>
+                  <div>
+                    {% if test.status == 'pending' %}
+                      <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                    {% else %}
+                      <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Completed</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                {% if test.status == 'pending' %}
+                  <div class="mt-2">
+                    <a href="{{ url_for('farmer.soil_test_results', test_id=test.id) }}"
+                       class="btn btn-success btn-sm">
+                      <i class="bi bi-pencil-square me-1"></i>Enter Results
+                    </a>
+                  </div>
+                {% endif %}
+
+                {% if test.status == 'completed' and test.results_json %}
+                  {% set r = test.results_json | from_json %}
+                  <div class="mt-2 d-flex flex-wrap gap-2">
+                    <span class="badge bg-light text-dark border">pH {{ r.pH }}</span>
+                    <span class="badge bg-light text-dark border">N: {{ r.nitrogen }}</span>
+                    <span class="badge bg-light text-dark border">P: {{ r.phosphorus }}</span>
+                    <span class="badge bg-light text-dark border">OM: {{ r.organic_matter }}</span>
+                  </div>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Info card -->
+      <div class="card border-0 shadow-sm mt-3">
+        <div class="card-body">
+          <h6 class="fw-semibold mb-2"><i class="bi bi-info-circle text-success me-2"></i>How soil testing works</h6>
+          <ol class="mb-0 small text-muted ps-3">
+            <li class="mb-1">Book a test and collect a soil sample from your field (instructions provided by the lab).</li>
+            <li class="mb-1">Mail or drop off your sample at the chosen Extension office.</li>
+            <li class="mb-1">Results arrive in 1–4 weeks — enter them here to unlock crop suggestions.</li>
+            <li>GroundUp combines your results with live Rio Grande water data and drought conditions to recommend the best crops for your land.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Highlight selected centre option
+  document.querySelectorAll('.gu-centre-option').forEach(label => {
+    label.addEventListener('click', () => {
+      document.querySelectorAll('.gu-centre-option').forEach(l => l.classList.remove('selected'));
+      label.classList.add('selected');
+    });
+  });
+</script>
+{% endblock %}

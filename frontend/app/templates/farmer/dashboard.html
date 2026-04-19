@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+{% block title %}Farmer Dashboard — CropPulse{% endblock %}
+
+{% block content %}
+<div class="gu-dashboard-header">
+  <div class="container">
+    <h2 class="fw-bold mb-1">
+      <i class="bi bi-tree-fill me-2"></i>Farmer Dashboard
+      {% if current_user.is_subscribed %}
+      <span class="badge bg-warning text-dark ms-2 fs-6 align-middle"><i class="bi bi-patch-check-fill me-1"></i>Pro</span>
+      {% endif %}
+    </h2>
+    <p class="mb-0 opacity-75">Welcome, {{ current_user.name }} &mdash; {{ current_user.location or 'New Mexico' }}</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <a href="{{ url_for('farmer.soil_test') }}" class="text-decoration-none">
+        <div class="gu-kpi-card h-100">
+          <div class="text-muted small">Book Soil Tests</div>
+          <div class="gu-kpi-number">{{ tests|length }}</div>
+          <div class="text-muted small">{{ completed|length }} completed</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      {% if completed %}
+      <a href="{{ url_for('farmer.crop_matches') }}" class="text-decoration-none">
+        <div class="gu-kpi-card h-100">
+          <div class="text-muted small">Crop Matches</div>
+          <div class="gu-kpi-number"><i class="bi bi-flower2" style="font-size:1.6rem;"></i></div>
+          <div class="text-muted small">Suggestions ready</div>
+        </div>
+      </a>
+      {% else %}
+      <div class="gu-kpi-card h-100">
+        <div class="text-muted small">Crop Matches</div>
+        <div class="gu-kpi-number">—</div>
+        <div class="text-muted small">Pending soil results</div>
+      </div>
+      {% endif %}
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{{ url_for('farmer.water_guide') }}" class="text-decoration-none">
+        <div class="gu-kpi-card h-100">
+          <div class="text-muted small">Water Guide {% if not current_user.is_subscribed %}<i class="bi bi-lock-fill text-warning ms-1"></i>{% endif %}</div>
+          <div class="gu-kpi-number"><i class="bi bi-droplet-half" style="font-size:1.6rem;"></i></div>
+          <div class="text-muted small">{% if current_user.is_subscribed %}Irrigation &amp; storage{% else %}Pro feature{% endif %}</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-6 col-md-3">
+      <a href="{{ url_for('farmer.soil_resources') }}" class="text-decoration-none">
+        <div class="gu-kpi-card h-100">
+          <div class="text-muted small">Soil Resources {% if not current_user.is_subscribed %}<i class="bi bi-lock-fill text-warning ms-1"></i>{% endif %}</div>
+          <div class="gu-kpi-number"><i class="bi bi-recycle" style="font-size:1.6rem;"></i></div>
+          <div class="text-muted small">{% if current_user.is_subscribed %}Amendments &amp; supplies{% else %}Pro feature{% endif %}</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  {# Transactions row #}
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4">
+      <a href="{{ url_for('farmer.transactions') }}" class="text-decoration-none">
+        <div class="gu-kpi-card h-100">
+          <div class="text-muted small">Facility Contacts</div>
+          <div class="gu-kpi-number">{{ referral_count }}</div>
+          <div class="text-muted small">facilities connected</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  {# Upgrade banner for free users #}
+  {% if not current_user.is_subscribed %}
+  <div class="alert border-0 shadow-sm d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4"
+       style="background:linear-gradient(135deg,#f0fdf4,#dcfce7); border-left: 4px solid var(--gu-green) !important;">
+    <div>
+      <div class="fw-semibold"><i class="bi bi-stars text-success me-2"></i>Unlock CropPulse Pro — $15/month</div>
+      <div class="text-muted small">Water Guide, Amendment Calculator, and unlimited soil tests</div>
+    </div>
+    <a href="{{ url_for('farmer.upgrade') }}" class="btn btn-success btn-sm fw-semibold">
+      <i class="bi bi-lightning-fill me-1"></i>Upgrade Now
+    </a>
+  </div>
+  {% endif %}
+
+  {# ══════════════════════════════════════════════════════════════════
+     FEATURE 4 — NASS Crop Price Alerts (loaded async, no page-render cost)
+  ══════════════════════════════════════════════════════════════════ #}
+  <div id="price-alerts-section" class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold border-bottom d-flex flex-wrap align-items-center gap-2">
+      <i class="bi bi-graph-up-arrow text-success"></i> Crop Price Signals
+      <span class="ms-auto badge bg-secondary bg-opacity-20 text-secondary fw-normal small text-wrap">USDA NASS</span>
+    </div>
+    <div class="card-body p-3" id="price-alerts-body">
+      <div class="d-flex align-items-center gap-2 text-muted py-2" id="price-alerts-spinner">
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+        <span>Loading price signals…</span>
+      </div>
+    </div>
+  </div>
+
+  {# ══════════════════════════════════════════════════════════════════
+     FEATURE 3 — Soil Health Trend Chart
+  ══════════════════════════════════════════════════════════════════ #}
+  {% if completed | length >= 1 %}
+  <div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white fw-semibold border-bottom d-flex flex-wrap align-items-center gap-2">
+      <i class="bi bi-activity text-success"></i> Soil Health Trend
+      <span class="ms-auto text-muted small fw-normal">{{ completed|length }} test{{ 's' if completed|length > 1 }}</span>
+    </div>
+    <div class="card-body p-3">
+
+      {# Trend summary badges (only if 2+ tests) #}
+      {% if trend_summary %}
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        {% for item in trend_summary %}
+        <span class="badge fs-6 fs-sm-6 px-2 px-md-3 py-2
+          {% if item.good %}bg-success{% else %}bg-danger{% endif %}">
+          {{ item.arrow }} {{ item.label }}
+          {% if item.pct > 0 %}{{ item.pct }}% since last test{% endif %}
+        </span>
+        {% endfor %}
+      </div>
+      {% elif completed | length == 1 %}
+      <div class="alert alert-info border-0 py-2 small mb-3">
+        <i class="bi bi-info-circle me-1"></i>
+        Complete a second soil test to see trends. Your first test is charted below.
+      </div>
+      {% endif %}
+
+      <div id="soil-trend-chart" style="height:380px; position:relative;">
+        <canvas id="soil-trend-canvas"></canvas>
+      </div>
+
+      <div class="small text-muted mt-2">
+        N / P scale: 1 = Low, 2 = Medium, 3 = High (NMSU categories).
+        pH and Organic Matter plotted on their own axes.
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{# ── Chart.js for soil trend (reliable multi-axis) ── #}
+{% if completed | length >= 1 %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  try {
+  var pts = {{ trend_points | safe }};
+  var canvas = document.getElementById('soil-trend-canvas');
+  if (!canvas) { console.error('soil-trend-canvas not found'); return; }
+  if (!pts || !pts.length) { console.warn('trend_points empty'); return; }
+
+  var labels = pts.map(function(p){ return p.date; });
+  var pH     = pts.map(function(p){ return p.pH; });
+  var om     = pts.map(function(p){ return p.om; });
+  var N      = pts.map(function(p){ return p.N; });
+  var P      = pts.map(function(p){ return p.P; });
+
+  var isMobile = window.innerWidth < 576;
+
+  new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'pH', data: pH, yAxisID: 'yPH',
+          borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,0.08)',
+          borderWidth: 2, pointRadius: isMobile ? 4 : 6, tension: 0.3 },
+        { label: 'Organic Matter %', data: om, yAxisID: 'yOM',
+          borderColor: '#198754', backgroundColor: 'rgba(25,135,84,0.08)',
+          borderWidth: 2, pointRadius: isMobile ? 4 : 6, tension: 0.3 },
+        { label: 'Nitrogen level', data: N, yAxisID: 'yNP',
+          borderColor: '#fd7e14', backgroundColor: 'rgba(253,126,20,0.08)',
+          borderWidth: 2, pointRadius: isMobile ? 4 : 6, tension: 0.3 },
+        { label: 'Phosphorus level', data: P, yAxisID: 'yNP',
+          borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,0.08)',
+          borderWidth: 2, pointRadius: isMobile ? 4 : 6, tension: 0.3 },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: isMobile ? 10 : 12 }, padding: isMobile ? 8 : 16, boxWidth: isMobile ? 12 : 40 }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              var v = ctx.parsed.y;
+              if (ctx.dataset.yAxisID === 'yNP') {
+                var map = {1:'Low', 2:'Medium', 3:'High'};
+                return ctx.dataset.label + ': ' + (map[v] || v);
+              }
+              return ctx.dataset.label + ': ' + v;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#e9ecef' },
+          ticks: { font: { size: isMobile ? 9 : 11 }, maxRotation: 45, minRotation: isMobile ? 30 : 0 }
+        },
+        yPH: {
+          type: 'linear', position: 'left',
+          title: { display: !isMobile, text: 'pH', color: '#0d6efd', font: { size: 11 } },
+          ticks: { color: '#0d6efd', font: { size: isMobile ? 9 : 11 } },
+          grid: { color: '#e9ecef' },
+        },
+        yOM: {
+          type: 'linear', position: 'right',
+          title: { display: !isMobile, text: 'OM %', color: '#198754', font: { size: 11 } },
+          ticks: { color: '#198754', font: { size: isMobile ? 9 : 11 }, maxTicksLimit: isMobile ? 4 : 8 },
+          grid: { drawOnChartArea: false },
+          min: 0,
+        },
+        yNP: {
+          type: 'linear', position: 'right',
+          title: { display: !isMobile, text: 'N / P', color: '#fd7e14', font: { size: 11 } },
+          ticks: {
+            color: '#fd7e14',
+            font: { size: isMobile ? 9 : 11 },
+            callback: function(v){ return ['','Low','Med','High'][v] || ''; },
+            stepSize: 1,
+          },
+          grid: { drawOnChartArea: false },
+          min: 0.5, max: 3.5,
+        }
+      }
+    }
+  });
+  } catch(e) {
+    console.error('Soil chart error:', e);
+    var errEl = document.getElementById('soil-trend-chart');
+    if (errEl) errEl.innerHTML = '<div class="d-flex align-items-center justify-content-center h-100 text-danger small">Chart error: ' + e.message + '</div>';
+  }
+});
+</script>
+{% endif %}
+
+{# ── Async price alerts loader ── #}
+<script>
+(function () {
+  const body    = document.getElementById('price-alerts-body');
+  const section = document.getElementById('price-alerts-section');
+  if (!body) return;
+
+  function renderAlert(a) {
+    const borderCls = a.alert_type === 'good'    ? 'border-success bg-success bg-opacity-10'
+                    : a.alert_type === 'low'     ? 'border-danger bg-danger bg-opacity-10'
+                    :                              'border-secondary bg-light';
+    const badgeHtml = a.alert_type === 'good'
+      ? `<span class="badge bg-success ms-auto"><i class="bi bi-arrow-up-circle-fill me-1"></i>${Math.abs(a.pct_diff).toFixed(1)}% above avg</span>`
+      : a.alert_type === 'low'
+      ? `<span class="badge bg-danger ms-auto"><i class="bi bi-arrow-down-circle-fill me-1"></i>${Math.abs(a.pct_diff).toFixed(1)}% below avg</span>`
+      : `<span class="badge bg-secondary ms-auto">Near average</span>`;
+
+    const bestBadge = a.is_best_month
+      ? `<div class="mt-1"><span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>Peak sell window now</span></div>`
+      : a.best_months && a.best_months.length
+      ? `<div class="small text-muted mt-1">Peak window: ${a.best_months.join(', ')}</div>`
+      : '';
+
+    return `
+      <div class="col-12 col-md-6 col-xl-4">
+        <div class="rounded p-3 border ${borderCls}">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="fs-5">${a.emoji}</span>
+            <strong>${a.crop_name}</strong>
+            ${badgeHtml}
+          </div>
+          <div class="small text-muted">${a.message}</div>
+          <div class="small mt-1">
+            <span class="fw-semibold">$${a.current_price}</span> ${a.unit}
+            <span class="text-muted ms-1">(5-yr avg: $${a.hist_avg})</span>
+            &mdash; <span class="text-muted">${a.month} ${a.year}</span>
+          </div>
+          ${bestBadge}
+        </div>
+      </div>`;
+  }
+
+  fetch("{{ url_for('farmer.api_price_alerts') }}")
+    .then(r => r.ok ? r.json() : Promise.reject(r.status))
+    .then(alerts => {
+      if (!alerts || alerts.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
+      body.innerHTML = `<div class="row g-2">${alerts.map(renderAlert).join('')}</div>`;
+    })
+    .catch(() => {
+      section.style.display = 'none';
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,341 @@
+﻿{% extends "base.html" %}
+{% block title %}Soil Resources — CropPulse{% endblock %}
+
+{% block content %}
+<div class="gu-dashboard-header">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="bi bi-recycle me-2"></i>Soil Improvement Resources</h2>
+    <p class="mb-2 opacity-75">New Mexico — EPA Excess Food Opportunities Map (Sept 2025)</p>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('farmer.dashboard') }}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+      </a>
+      {% if amendment_test %}
+      <a href="{{ url_for('farmer.amendments', test_id=amendment_test.id) }}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-calculator-fill me-1"></i>Amendment Calculator
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  {# ── Two summary cards ── #}
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card border-success shadow-sm h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          <div class="rounded-circle bg-success d-flex align-items-center justify-content-center flex-shrink-0"
+               style="width:52px;height:52px;">
+            <i class="bi bi-basket3-fill text-white fs-4"></i>
+          </div>
+          <div>
+            <h5 class="fw-bold mb-1 text-success">Source Soil Amendments</h5>
+            <p class="mb-1 text-muted small">
+              Visit these facilities to pick up <strong>finished compost</strong> (raises OM, N, P, K)
+              or <strong>digestate</strong> (fast-acting liquid nitrogen).
+            </p>
+            <div class="d-flex gap-2 flex-wrap">
+              <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                <i class="bi bi-droplet me-1"></i>{{ resources.counts.digestate }} Digestate (AD)
+              </span>
+              <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                <i class="bi bi-leaf me-1"></i>{{ resources.counts.compost }} Compost Sites
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-warning shadow-sm h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          <div class="rounded-circle bg-warning d-flex align-items-center justify-content-center flex-shrink-0"
+               style="width:52px;height:52px;">
+            <i class="bi bi-box-arrow-up text-dark fs-4"></i>
+          </div>
+          <div>
+            <h5 class="fw-bold mb-1 text-warning-emphasis">Sell or Donate Excess</h5>
+            <p class="mb-1 text-muted small">
+              Drop off <strong>crop &amp; organic waste</strong> at a composting site,
+              or <strong>donate surplus produce</strong> to a food bank.
+            </p>
+            <div class="d-flex gap-2 flex-wrap">
+              <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 px-2 py-1">
+                <i class="bi bi-trash3 me-1"></i>{{ resources.counts.crop_waste }} Crop Waste Drop-offs
+              </span>
+              <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning border-opacity-25 px-2 py-1">
+                <i class="bi bi-heart me-1"></i>{{ resources.counts.produce }} Food Banks / Pantries
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Location banner ── #}
+  {% if resources.farmer_city %}
+  <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-2 py-2 mb-3">
+    <i class="bi bi-geo-alt-fill fs-5"></i>
+    <span class="small">Sorted by distance from your profile location: <strong>{{ resources.farmer_city }}</strong>. <a href="{{ url_for('farmer.profile') }}" class="alert-link">Update location</a></span>
+  </div>
+  {% else %}
+  <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center gap-2 py-2 mb-3">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <span class="small">No location set — facilities shown in dataset order. <a href="{{ url_for('farmer.profile') }}" class="alert-link">Add your location in Profile</a> to sort by nearest first.</span>
+  </div>
+  {% endif %}
+
+  {# ── Filter bar ── #}
+  <div class="d-flex gap-2 flex-wrap align-items-center mb-3">
+    <span class="fw-semibold small me-1">Filter:</span>
+    <button class="btn btn-sm btn-outline-secondary active" onclick="filterTable('all', this)">All</button>
+    <button class="btn btn-sm btn-outline-success" onclick="filterTable('buy-digestate', this)">
+      <i class="bi bi-droplet me-1"></i>Buy — Digestate
+    </button>
+    <button class="btn btn-sm btn-outline-success" onclick="filterTable('buy-compost', this)">
+      <i class="bi bi-leaf me-1"></i>Buy — Compost
+    </button>
+    <button class="btn btn-sm btn-outline-warning text-dark" onclick="filterTable('sell-waste', this)">
+      <i class="bi bi-trash3 me-1"></i>Drop Off Waste
+    </button>
+    <button class="btn btn-sm btn-outline-danger" onclick="filterTable('donate', this)">
+      <i class="bi bi-heart me-1"></i>Donate Produce
+    </button>
+    <div class="ms-auto">
+      <input type="text" id="search-input" class="form-control form-control-sm" placeholder="Search name, city…" style="min-width:200px;" oninput="searchTable(this.value)">
+    </div>
+  </div>
+
+  {# Referral button macro #}
+  {% macro refer_btn(f, ftype) %}
+  <td class="text-center">
+    <form method="POST" action="{{ url_for('farmer.facility_refer') }}">
+      <input type="hidden" name="facility_name" value="{{ f.name }}">
+      <input type="hidden" name="facility_type" value="{{ ftype }}">
+      <input type="hidden" name="facility_city" value="{{ f.city or '' }}">
+      <button type="submit" class="btn btn-success btn-sm py-1 px-2" style="font-size:0.75rem;">
+        <i class="bi bi-send me-1"></i>Contact via CropPulse<br>
+        <span class="fw-normal opacity-75">$10 referral fee</span>
+      </button>
+    </form>
+  </td>
+  {% endmacro %}
+
+  {# ── Master table ── #}
+  <div class="shadow-sm rounded" style="max-height:520px; overflow-y:auto; overflow-x:auto;">
+    <table class="table table-hover table-bordered align-middle mb-0 bg-white" id="resources-table" style="min-width:900px;">
+      <thead class="table-dark" style="position:sticky; top:0; z-index:10;">
+        <tr>
+          <th style="width:46px;" class="text-center">#</th>
+          <th style="width:130px;">Action</th>
+          <th>Name</th>
+          <th>What It Processes</th>
+          <th style="width:140px;">Phone</th>
+          <th style="width:80px;" class="text-center">Website</th>
+          <th style="width:90px;" class="text-center">Distance</th>
+          <th>Address</th>
+          <th style="width:160px;" class="text-center">Refer via CropPulse</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {# ── Buy: Digestate ── #}
+        {% for f in resources.buy.digestate %}
+        <tr data-category="buy-digestate">
+          <td class="text-center text-muted small">{{ loop.index }}</td>
+          <td>
+            <span class="badge bg-info text-dark w-100 py-1">
+              <i class="bi bi-droplet-fill me-1"></i>Buy — Digestate
+            </span>
+            {% if f.facility_type %}
+            <div class="text-muted" style="font-size:0.7rem;">{{ f.facility_type }}</div>
+            {% endif %}
+          </td>
+          <td class="fw-semibold">{{ f.name }}</td>
+          <td class="small text-muted">{{ f.feedstock if f.feedstock else '—' }}</td>
+          <td class="small">
+            {% if f.lat and f.lon %}
+            <div class="text-muted" style="font-size:0.7rem;">Call for digestate availability</div>
+            {% endif %}
+            —
+          </td>
+          <td class="text-center">—</td>
+          <td class="text-center">
+            {% if f.distance_miles is not none %}
+            <span class="badge {% if f.distance_miles < 30 %}bg-success{% elif f.distance_miles < 75 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+              {{ f.distance_miles }} mi
+            </span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="small">
+            {% if f.city %}{{ f.city }}{% if f.county %}, {{ f.county }}{% endif %}{% endif %}
+            {% if f.address %}<br><span class="text-muted">{{ f.address }}{% if f.zip %}, {{ f.zip }}{% endif %}</span>{% endif %}
+          </td>
+          {{ refer_btn(f, 'Anaerobic Digestion') }}
+        </tr>
+        {% endfor %}
+
+        {# ── Buy: Compost ── #}
+        {% for f in resources.buy.compost %}
+        <tr data-category="buy-compost">
+          <td class="text-center text-muted small">{{ loop.index }}</td>
+          <td>
+            <span class="badge bg-success w-100 py-1">
+              <i class="bi bi-leaf-fill me-1"></i>Buy — Compost
+            </span>
+          </td>
+          <td class="fw-semibold">{{ f.name }}</td>
+          <td class="small text-muted">{{ f.feedstock if f.feedstock else '—' }}</td>
+          <td class="small">
+            {% if f.phone %}
+            <a href="tel:{{ f.phone }}" class="text-decoration-none">{{ f.phone }}</a>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-center">
+            {% if f.website %}
+            <a href="http://{{ f.website }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm py-0 px-1">
+              <i class="bi bi-box-arrow-up-right"></i>
+            </a>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-center">
+            {% if f.distance_miles is not none %}
+            <span class="badge {% if f.distance_miles < 30 %}bg-success{% elif f.distance_miles < 75 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+              {{ f.distance_miles }} mi
+            </span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="small">
+            {% if f.city %}{{ f.city }}{% if f.county %}, {{ f.county }}{% endif %}{% endif %}
+            {% if f.address %}<br><span class="text-muted">{{ f.address }}{% if f.zip %}, {{ f.zip }}{% endif %}</span>{% endif %}
+          </td>
+          {{ refer_btn(f, 'Composting') }}
+        </tr>
+        {% endfor %}
+
+        {# ── Sell: Drop-off crop waste ── #}
+        {% for f in resources.sell.crop_waste %}
+        <tr data-category="sell-waste">
+          <td class="text-center text-muted small">{{ loop.index }}</td>
+          <td>
+            <span class="badge bg-warning text-dark w-100 py-1">
+              <i class="bi bi-trash3-fill me-1"></i>Drop Off Waste
+            </span>
+          </td>
+          <td class="fw-semibold">{{ f.name }}</td>
+          <td class="small text-muted">{{ f.feedstock if f.feedstock else '—' }}</td>
+          <td class="small">
+            {% if f.phone %}
+            <a href="tel:{{ f.phone }}" class="text-decoration-none">{{ f.phone }}</a>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-center">
+            {% if f.website %}
+            <a href="http://{{ f.website }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm py-0 px-1">
+              <i class="bi bi-box-arrow-up-right"></i>
+            </a>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-center">
+            {% if f.distance_miles is not none %}
+            <span class="badge {% if f.distance_miles < 30 %}bg-success{% elif f.distance_miles < 75 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+              {{ f.distance_miles }} mi
+            </span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="small">
+            {% if f.city %}{{ f.city }}{% if f.county %}, {{ f.county }}{% endif %}{% endif %}
+            {% if f.address %}<br><span class="text-muted">{{ f.address }}{% if f.zip %}, {{ f.zip }}{% endif %}</span>{% endif %}
+          </td>
+          {{ refer_btn(f, 'Crop Waste Drop-off') }}
+        </tr>
+        {% endfor %}
+
+        {# ── Donate: Food banks ── #}
+        {% for f in resources.sell.produce %}
+        <tr data-category="donate">
+          <td class="text-center text-muted small">{{ loop.index }}</td>
+          <td>
+            <span class="badge bg-danger w-100 py-1">
+              <i class="bi bi-heart-fill me-1"></i>Donate Produce
+            </span>
+            {% if f.type %}
+            <div class="text-muted" style="font-size:0.7rem;">{{ f.type }}</div>
+            {% endif %}
+          </td>
+          <td class="fw-semibold">{{ f.name }}</td>
+          <td class="small text-muted">Surplus produce / vegetables / grain</td>
+          <td class="small">—</td>
+          <td class="text-center">
+            {% if f.website %}
+            <a href="{{ f.website }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm py-0 px-1">
+              <i class="bi bi-box-arrow-up-right"></i>
+            </a>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-center">
+            {% if f.distance_miles is not none %}
+            <span class="badge {% if f.distance_miles < 30 %}bg-success{% elif f.distance_miles < 75 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+              {{ f.distance_miles }} mi
+            </span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="small">
+            {% if f.city %}{{ f.city }}{% endif %}
+            {% if f.address %}<br><span class="text-muted">{{ f.address }}{% if f.zip %}, {{ f.zip }}{% endif %}</span>{% endif %}
+          </td>
+          {{ refer_btn(f, 'Food Bank / Produce Donation') }}
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mt-2">
+    <span id="row-count" class="small text-muted"></span>
+    <span class="text-muted small">
+      <i class="bi bi-database me-1"></i>EPA Excess Food Opportunities Map v3.1 — Sept 2025
+    </span>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  let activeCategory = 'all';
+
+  function updateCount() {
+    const visible = document.querySelectorAll('#resources-table tbody tr:not([style*="display: none"])').length;
+    document.getElementById('row-count').textContent = visible + ' entries shown';
+  }
+
+  window.filterTable = function (cat, btn) {
+    activeCategory = cat;
+    document.querySelectorAll('.d-flex .btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  };
+
+  window.searchTable = function (q) {
+    applyFilters(q);
+  };
+
+  function applyFilters(q) {
+    const query = (q !== undefined ? q : document.getElementById('search-input').value).toLowerCase();
+    document.querySelectorAll('#resources-table tbody tr').forEach(row => {
+      const catMatch = activeCategory === 'all' || row.dataset.category === activeCategory;
+      const textMatch = !query || row.textContent.toLowerCase().includes(query);
+      row.style.display = (catMatch && textMatch) ? '' : 'none';
+    });
+    updateCount();
+  }
+
+  // init count
+  updateCount();
+})();
+</script>
+{% endblock %}

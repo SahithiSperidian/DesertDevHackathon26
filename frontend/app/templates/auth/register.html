@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block title %}Create Account — GroundUp{% endblock %}
+
+{% block content %}
+<div class="gu-auth-wrapper d-flex align-items-center justify-content-center py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-6 col-lg-5">
+
+        <div class="text-center mb-4">
+          <a href="{{ url_for('auth.index') }}" class="text-decoration-none">
+            <span class="gu-auth-logo"><i class="bi bi-flower1 me-2"></i>GroundUp</span>
+          </a>
+          <h2 class="fw-bold mt-3">Create your account</h2>
+          <p class="text-muted">Join New Mexico's local food network</p>
+        </div>
+
+        <!-- Role Toggle -->
+        <div class="gu-role-toggle mb-4">
+          <p class="text-center fw-medium mb-2">I am a...</p>
+          <div class="gu-role-pills d-flex gap-2 justify-content-center" id="rolePills">
+            <button type="button" class="gu-role-pill active" data-role="farmer" id="pill-farmer">
+              <i class="bi bi-tree-fill me-2"></i>Farmer
+            </button>
+            <button type="button" class="gu-role-pill" data-role="partner" id="pill-partner">
+              <i class="bi bi-recycle me-2"></i>Resource Partner
+            </button>
+          </div>
+          <!-- Role description that swaps -->
+          <p class="text-center text-muted small mt-2" id="roleDesc">
+            Book soil tests, get crop suggestions, and find local resources.
+          </p>
+        </div>
+
+        <div class="gu-auth-card">
+          <form method="POST" action="{{ url_for('auth.register') }}" novalidate id="registerForm">
+
+            <!-- Hidden role field -->
+            <input type="hidden" name="role" id="roleField" value="farmer" />
+
+            <div class="mb-3">
+              <label for="name" class="form-label fw-medium">Full name</label>
+              <div class="input-group">
+                <span class="input-group-text gu-input-icon"><i class="bi bi-person"></i></span>
+                <input
+                  type="text"
+                  class="form-control gu-input"
+                  id="name"
+                  name="name"
+                  placeholder="Maria Garcia"
+                  required
+                  autocomplete="name"
+                />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label fw-medium">Email address</label>
+              <div class="input-group">
+                <span class="input-group-text gu-input-icon"><i class="bi bi-envelope"></i></span>
+                <input
+                  type="email"
+                  class="form-control gu-input"
+                  id="email"
+                  name="email"
+                  placeholder="you@example.com"
+                  required
+                  autocomplete="email"
+                />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="location" class="form-label fw-medium">
+                Location <span class="text-muted fw-normal small">(optional)</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text gu-input-icon"><i class="bi bi-geo-alt"></i></span>
+                <input
+                  type="text"
+                  class="form-control gu-input"
+                  id="location"
+                  name="location"
+                  placeholder="Albuquerque, NM"
+                  autocomplete="address-level2"
+                />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="password" class="form-label fw-medium">Password</label>
+              <div class="input-group">
+                <span class="input-group-text gu-input-icon"><i class="bi bi-lock"></i></span>
+                <input
+                  type="password"
+                  class="form-control gu-input"
+                  id="password"
+                  name="password"
+                  placeholder="Min. 8 characters"
+                  required
+                  autocomplete="new-password"
+                />
+                <button class="btn gu-pw-toggle" type="button" id="togglePassword" tabindex="-1">
+                  <i class="bi bi-eye" id="toggleIcon"></i>
+                </button>
+              </div>
+              <!-- Password strength bar -->
+              <div class="gu-pw-strength mt-2">
+                <div class="gu-pw-strength-bar" id="pwStrengthBar"></div>
+              </div>
+              <small class="text-muted" id="pwStrengthLabel"></small>
+            </div>
+
+            <div class="mb-4">
+              <label for="confirm_password" class="form-label fw-medium">Confirm password</label>
+              <div class="input-group">
+                <span class="input-group-text gu-input-icon"><i class="bi bi-lock-fill"></i></span>
+                <input
+                  type="password"
+                  class="form-control gu-input"
+                  id="confirm_password"
+                  name="confirm_password"
+                  placeholder="Repeat password"
+                  required
+                  autocomplete="new-password"
+                />
+              </div>
+              <small class="text-danger d-none" id="pwMatchError">Passwords do not match.</small>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 gu-btn-primary" id="submitBtn">
+              <i class="bi bi-person-plus me-2"></i>Create Account
+            </button>
+
+          </form>
+
+          <hr class="gu-divider my-4" />
+
+          <p class="text-center text-muted mb-0 small">
+            Already have an account?
+            <a href="{{ url_for('auth.login') }}" class="text-success fw-semibold">Sign in</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // ----- Role pill toggle -----
+  const roleDescriptions = {
+    farmer: "Book soil tests, get crop suggestions, and find local resources.",
+    partner: "List compost, water, equipment, and connect with local farmers."
+  };
+
+  document.getElementById('rolePills').addEventListener('click', (e) => {
+    const pill = e.target.closest('.gu-role-pill');
+    if (!pill) return;
+    document.querySelectorAll('.gu-role-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    const role = pill.dataset.role;
+    document.getElementById('roleField').value = role;
+    document.getElementById('roleDesc').textContent = roleDescriptions[role];
+  });
+
+  // ----- Password toggle -----
+  const toggleBtn = document.getElementById('togglePassword');
+  const pwInput = document.getElementById('password');
+  const toggleIcon = document.getElementById('toggleIcon');
+  toggleBtn.addEventListener('click', () => {
+    const isHidden = pwInput.type === 'password';
+    pwInput.type = isHidden ? 'text' : 'password';
+    toggleIcon.className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
+  });
+
+  // ----- Password strength -----
+  const strengthBar = document.getElementById('pwStrengthBar');
+  const strengthLabel = document.getElementById('pwStrengthLabel');
+  pwInput.addEventListener('input', () => {
+    const val = pwInput.value;
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+    const colors = ['', '#e74c3c', '#f39c12', '#2ecc71', '#27ae60'];
+    const widths = ['0%', '25%', '50%', '75%', '100%'];
+
+    strengthBar.style.width = widths[score];
+    strengthBar.style.backgroundColor = colors[score];
+    strengthLabel.textContent = score > 0 ? labels[score] : '';
+    strengthLabel.style.color = colors[score];
+  });
+
+  // ----- Confirm password match -----
+  const confirmInput = document.getElementById('confirm_password');
+  const pwMatchError = document.getElementById('pwMatchError');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function checkMatch() {
+    if (confirmInput.value && pwInput.value !== confirmInput.value) {
+      pwMatchError.classList.remove('d-none');
+      submitBtn.disabled = true;
+    } else {
+      pwMatchError.classList.add('d-none');
+      submitBtn.disabled = false;
+    }
+  }
+  confirmInput.addEventListener('input', checkMatch);
+  pwInput.addEventListener('input', checkMatch);
+
+  // Pre-select role from URL param
+  const urlRole = new URLSearchParams(window.location.search).get('role');
+  if (urlRole === 'partner') {
+    document.getElementById('pill-farmer').classList.remove('active');
+    document.getElementById('pill-partner').classList.add('active');
+    document.getElementById('roleField').value = 'partner';
+    document.getElementById('roleDesc').textContent = roleDescriptions['partner'];
+  }
+</script>
+{% endblock %}

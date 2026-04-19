@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% block title %}Amendment Plan — CropPulse{% endblock %}
+
+{% block content %}
+<div class="gu-dashboard-header">
+  <div class="container">
+    <h2 class="fw-bold mb-1"><i class="bi bi-calculator-fill me-2"></i>Soil Amendment Plan</h2>
+    <p class="mb-1 opacity-75">
+      Soil Test #{{ test.id }} &mdash; {{ test.location or 'NM' }} &mdash; {{ test.created_at.strftime('%b %d, %Y') }}
+    </p>
+    <p class="mb-2 opacity-75 small"><i class="bi bi-geo-alt me-1"></i>Nearest facilities from: <strong>{{ result.farmer_city }}</strong></p>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{{ url_for('farmer.crop_match', test_id=test.id) }}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to Crop Match Results
+      </a>
+      <a href="{{ url_for('farmer.soil_resources', test_id=test.id) }}" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-recycle me-1"></i>Browse All NM Facilities
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  {# ── Soil snapshot ── #}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header fw-semibold d-flex align-items-center gap-2">
+      <i class="bi bi-clipboard-data-fill text-secondary"></i>
+      Your Soil Test Values
+      <span class="ms-auto badge bg-secondary bg-opacity-25 text-secondary fw-normal small">
+        Source: NMSU / NMDA Lab results you entered
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-6 col-md-3">
+          <div class="text-muted small mb-1">pH</div>
+          <div class="fw-bold fs-5">{{ soil.pH }}</div>
+          <div class="text-muted" style="font-size:0.75rem;">Optimal: 6.0–7.5 (NMSU A-122)</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="text-muted small mb-1">Nitrogen</div>
+          <div class="fw-bold fs-5 text-capitalize">{{ soil.nitrogen }}</div>
+          <div class="text-muted" style="font-size:0.75rem;">Target: medium–high</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="text-muted small mb-1">Phosphorus</div>
+          <div class="fw-bold fs-5 text-capitalize">{{ soil.phosphorus }}</div>
+          <div class="text-muted" style="font-size:0.75rem;">Target: medium–high</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="text-muted small mb-1">Organic Matter</div>
+          <div class="fw-bold fs-5">{{ soil.organic_matter }}%</div>
+          <div class="text-muted" style="font-size:0.75rem;">Optimal: ≥ 2.5% (NMSU CR-504)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ── No deficiencies ── #}
+  {% if not result.deficiencies %}
+  <div class="alert alert-success shadow-sm d-flex align-items-center gap-3">
+    <i class="bi bi-check-circle-fill fs-3"></i>
+    <div>
+      <strong>Your soil is in great shape!</strong>
+      No amendments needed based on NMSU optimal ranges. Maintain with annual compost top-dressing (0.5 t/acre).
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── Deficiency cards ── #}
+  {% for d in result.deficiencies %}
+  <div class="card shadow-sm mb-4 border-{{ d.badge_color }}">
+    <div class="card-header bg-{{ d.badge_color }} bg-opacity-10 border-bottom border-{{ d.badge_color }} border-opacity-25">
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <i class="bi {{ d.icon }} text-{{ d.badge_color }}"></i>
+        <span class="fw-bold">{{ d.nutrient }}</span>
+        <span class="badge bg-{{ d.badge_color }}">Deficient</span>
+        <span class="ms-auto text-muted small text-nowrap">Current: <strong>{{ d.current }}</strong> &rarr; Target: <strong>{{ d.target }}</strong></span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row g-4">
+
+        {# Left: Amendment details #}
+        <div class="col-lg-5">
+          <h6 class="fw-bold mb-3"><i class="bi bi-bag-fill me-2 text-success"></i>Recommended Amendment</h6>
+          <div class="p-3 rounded bg-light border mb-3">
+            <div class="mb-2">
+              <span class="fw-semibold d-block mb-1">{{ d.primary_amendment }}</span>
+              <span class="badge bg-success text-wrap" style="white-space:normal;font-size:0.82rem;">{{ d.quantity }}</span>
+            </div>
+            <p class="mb-2 small text-muted" style="overflow-wrap:break-word;word-break:break-word;">{{ d.quantity_note }}</p>
+            <div class="text-muted" style="font-size:0.72rem;overflow-wrap:break-word;">
+              <i class="bi bi-journal-text me-1"></i>{{ d.reference }}
+            </div>
+          </div>
+
+          {# Nitrogen has two options: compost vs digestate #}
+          {% if d.facility_type == 'compost_and_digestate' %}
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <div class="p-2 rounded border text-center" style="font-size:0.78rem;">
+                <i class="bi bi-leaf-fill text-success d-block fs-5 mb-1"></i>
+                <strong>Compost</strong><br>
+                <span class="text-muted">{{ d.nearest_compost|length }} sites nearby</span>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="p-2 rounded border text-center" style="font-size:0.78rem;">
+                <strong>Digestate (AD)</strong><br>
+                <span class="text-muted">{{ d.nearest_digestate|length }} sites nearby</span>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        {# Right: nearest facilities #}
+        <div class="col-lg-7">
+
+          {% if d.facility_type == 'compost_and_digestate' %}
+            {# Compost facilities for N #}
+            {% if d.nearest_compost %}
+            <h6 class="fw-bold mb-2"><i class="bi bi-geo-alt-fill text-success me-1"></i>Nearest Compost Sites</h6>
+            <div class="table-responsive mb-3">
+              <table class="table table-sm table-hover mb-0">
+                <thead class="table-light"><tr><th>#</th><th>Name</th><th>City</th><th class="text-end">Distance</th><th>Phone</th></tr></thead>
+                <tbody>
+                {% for f in d.nearest_compost %}
+                <tr>
+                  <td class="text-muted">{{ loop.index }}</td>
+                  <td class="fw-semibold small">{{ f.name }}</td>
+                  <td class="small text-muted">{{ f.city }}</td>
+                  <td class="text-end">
+                    <span class="badge {% if f.distance_miles < 30 %}bg-success{% elif f.distance_miles < 75 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                      {{ f.distance_miles }} mi
+                    </span>
+                  </td>
+                  <td class="small">
+                    {% if f.phone %}<a href="tel:{{ f.phone }}">{{ f.phone }}</a>{% else %}—{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% endif %}
+
+            {# Digestate facilities for N #}
+            {% if d.nearest_digestate %}
+            <h6 class="fw-bold mb-2"><i class="bi bi-geo-alt-fill text-info me-1"></i>Nearest Digestate (AD) Sites</h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover mb-0">
+                <thead class="table-light"><tr><th>#</th><th>Name</th><th>City</th><th class="text-end">Distance</th></tr></thead>
+                <tbody>
+                {% for f in d.nearest_digestate %}
+                <tr>
+                  <td class="text-muted">{{ loop.index }}</td>
+                  <td class="fw-semibold small">{{ f.name }}</td>
+                  <td class="small text-muted">{{ f.city }}</td>
+                  <td class="text-end">
+                    <span class="badge {% if f.distance_miles < 30 %}bg-success{% elif f.distance_miles < 75 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                      {{ f.distance_miles }} mi
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% endif %}
+
+          {% elif d.nearest_facilities %}
+            <h6 class="fw-bold mb-2">
+              <i class="bi bi-geo-alt-fill text-success me-1"></i>
+              Nearest NM Facilities to Source This Amendment
+            </h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover mb-0">
+                <thead class="table-light">
+                  <tr><th>#</th><th>Name</th><th>City</th><th class="text-end">Distance</th><th>Phone</th><th class="text-center">Web</th></tr>
+                </thead>
+                <tbody>
+                {% for f in d.nearest_facilities %}
+                <tr>
+                  <td class="text-muted">{{ loop.index }}</td>
+                  <td class="fw-semibold small">{{ f.name }}</td>
+                  <td class="small text-muted">{{ f.city }}</td>
+                  <td class="text-end">
+                    <span class="badge {% if f.distance_miles < 30 %}bg-success{% elif f.distance_miles < 75 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                      {{ f.distance_miles }} mi
+                    </span>
+                  </td>
+                  <td class="small">
+                    {% if f.phone %}<a href="tel:{{ f.phone }}">{{ f.phone }}</a>{% else %}—{% endif %}
+                  </td>
+                  <td class="text-center">
+                    {% if f.website %}
+                    <a href="http://{{ f.website }}" target="_blank" rel="noopener noreferrer"
+                       class="btn btn-outline-secondary btn-sm py-0 px-1">
+                      <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                    {% else %}—{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+          {% elif d.facility_type == 'none' %}
+            <div class="alert alert-light border mb-0 d-flex gap-3 align-items-start">
+              <i class="bi bi-shop fs-4 text-secondary flex-shrink-0 mt-1"></i>
+              <div class="small text-muted">
+                <strong>{{ d.primary_amendment }}</strong> is purchased from farm supply stores
+                (e.g. Tractor Supply, local feed stores, Lowe's Garden Center).
+                No EPA facility needed — available statewide.
+              </div>
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  {# ── Already OK section ── #}
+  {% if result.already_ok %}
+  <div class="card shadow-sm border-success mb-4">
+    <div class="card-header fw-semibold bg-success bg-opacity-10 border-bottom border-success border-opacity-25">
+      <i class="bi bi-check2-circle text-success me-2"></i>No Amendment Needed
+    </div>
+    <div class="card-body">
+      <div class="d-flex flex-wrap gap-3">
+        {% for item in result.already_ok %}
+        <div class="d-flex align-items-center gap-2 p-2 rounded border border-success border-opacity-25 bg-success bg-opacity-10">
+          <i class="bi {{ item.icon }} text-success"></i>
+          <div>
+            <div class="fw-semibold small">{{ item.nutrient }}</div>
+            <div class="text-muted" style="font-size:0.75rem;">Current: {{ item.current }} ✓</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ── Data sources footer ── #}
+  <div class="card bg-light border-0 shadow-sm">
+    <div class="card-body small text-muted">
+      <i class="bi bi-journal-text me-2"></i>
+      <strong>Data sources:</strong>
+      Amendment rates from NMSU Cooperative Extension Service (Circular CR-504, Guide A-129, Circular A-122).
+      Facility locations and distances from the
+      <strong>EPA Excess Food Opportunities Map v3.1 (Sept 2025)</strong>, filtered to New Mexico.
+      Distances calculated using the Haversine formula from your test location
+      (<strong>{{ result.farmer_city }}</strong>).
+    </div>
+  </div>
+
+</div>
+{% endblock %}
