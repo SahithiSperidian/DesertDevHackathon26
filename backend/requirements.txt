@@ -5,3 +5,5 @@ plotly
 pandas
 openpyxl
 werkzeug
+python-dotenv
+requests
