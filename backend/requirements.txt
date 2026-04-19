@@ -1,9 +1,11 @@
 flask
 flask-sqlalchemy
 flask-login
+flask-migrate
 plotly
 pandas
 openpyxl
 werkzeug
 python-dotenv
 requests
+psycopg2-binary

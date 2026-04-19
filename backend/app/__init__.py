@@ -25,8 +25,13 @@ def create_app():
         static_folder=_static_dir,
     )
 
-    app.config["SECRET_KEY"] = "croppulse-hackathon-secret-2026"
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///croppulse.db"
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "croppulse-hackathon-secret-2026")
+    # Use DATABASE_URL from env (Render PostgreSQL) or fall back to local SQLite
+    db_url = os.environ.get("DATABASE_URL", "sqlite:///croppulse.db")
+    # Render gives postgres:// but SQLAlchemy needs postgresql://
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db.init_app(app)
