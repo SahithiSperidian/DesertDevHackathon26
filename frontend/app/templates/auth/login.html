@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Login — GroundUp{% endblock %}
+{% block title %}Login — CropPulse{% endblock %}
 
 {% block content %}
 <div class="gu-auth-wrapper d-flex align-items-center justify-content-center py-5">
@@ -9,7 +9,7 @@
 
         <div class="text-center mb-4">
           <a href="{{ url_for('auth.index') }}" class="text-decoration-none">
-            <span class="gu-auth-logo"><i class="bi bi-flower1 me-2"></i>GroundUp</span>
+            <span class="gu-auth-logo"><img src="{{ url_for('static', filename='img/Logo.jpeg') }}" height="36" style="border-radius:6px;"></span>
           </a>
           <h2 class="fw-bold mt-3">Welcome back</h2>
           <p class="text-muted">Sign in to your account</p>

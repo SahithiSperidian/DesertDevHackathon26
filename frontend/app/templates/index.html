@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}GroundUp — New Mexico Food &amp; Agriculture Platform{% endblock %}
+{% block title %}CropPulse — New Mexico Farm Intelligence Platform{% endblock %}
 
 {% block content %}
 <!-- Hero -->
@@ -8,8 +8,8 @@
     <p class="gu-hero-eyebrow">Desert Dev Lab Hackathon 2026</p>
     <h1 class="gu-hero-title">Grow Smarter.<br/>Connect Better.</h1>
     <p class="gu-hero-sub">
-      GroundUp links New Mexico farmers with local resources — compost, water, equipment, and more —
-      powered by real USDA &amp; state agricultural data.
+      CropPulse gives New Mexico farmers real-time crop, water, and soil intelligence —
+      powered by live USGS, NOAA, USDA, and Drought Monitor data.
     </p>
     <div class="d-flex gap-3 justify-content-center mt-4 flex-wrap">
       <a href="{{ url_for('auth.register') }}?role=farmer" class="btn btn-success btn-lg px-4">
@@ -57,7 +57,7 @@
 
 <!-- Features -->
 <section class="container py-5">
-  <h2 class="text-center fw-bold mb-5">How GroundUp Works</h2>
+  <h2 class="text-center fw-bold mb-5">How CropPulse Works</h2>
   <div class="row g-4">
     <!-- Farmer flow -->
     <div class="col-md-6">
@@ -100,7 +100,7 @@
 <section class="gu-cta-section py-5 text-center text-white">
   <div class="container">
     <h2 class="fw-bold">Ready to grow New Mexico's local food system?</h2>
-    <p class="mt-2 opacity-75">Join farmers and resource partners already on GroundUp.</p>
+    <p class="mt-2 opacity-75">Join farmers and resource partners already on CropPulse.</p>
     <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg mt-3 px-5 text-success fw-bold">Create Free Account</a>
   </div>
 </section>
