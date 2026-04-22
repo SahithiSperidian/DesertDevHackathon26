@@ -62,6 +62,13 @@ def create_app():
         db.create_all()
         # Safe migration: add new columns to existing SQLite DB if missing
         _run_migrations(app)
+        
+        # Log the active database backend to help debug persistence issues
+        db_url_str = str(db.engine.url)
+        db_type = "PostgreSQL" if "postgresql" in db_url_str or "postgres" in db_url_str else "SQLite"
+        app.logger.info(f"✨ Database initialized using: {db_type}")
+        if db_type == "SQLite":
+             app.logger.warning("⚠️ Using SQLite fallback. Data will NOT persist on Render restarts!")
 
     return app
 

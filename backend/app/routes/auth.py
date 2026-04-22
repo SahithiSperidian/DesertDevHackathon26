@@ -72,11 +72,16 @@ def register():
 
         user = User(name=name, email=email, role=role, location=location)
         user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
-
-        login_user(user)
-        flash(f"Account created! Welcome to CropPulse, {name}.", "success")
+        
+        try:
+            db.session.add(user)
+            db.session.commit()
+            login_user(user)
+            flash(f"Account created! Welcome to CropPulse, {name}.", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred during account creation. Please try again.", "danger")
+            return render_template("auth/register.html")
 
         if role == "farmer":
             return redirect(url_for("farmer.dashboard"))

@@ -207,9 +207,14 @@ def book_soil_test():
         test_center=centre["name"],
         status="pending",
     )
-    db.session.add(test)
-    db.session.commit()
-    flash(f"Soil test booked at {centre['name']}. We'll notify you when results are ready.", "success")
+    try:
+        db.session.add(test)
+        db.session.commit()
+        flash(f"Soil test booked at {centre['name']}. We'll notify you when results are ready.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Error booking soil test. Please try again.", "danger")
+    
     return redirect(url_for("farmer.soil_test"))
 
 
@@ -538,7 +543,13 @@ def close_deal(referral_id):
     referral.commission_usd = referral.referral_fee_usd + (deal_value * referral.commission_pct / 100)
     referral.status = "deal_closed"
     referral.closed_at = datetime.utcnow()
-    db.session.commit()
+    
+    try:
+        db.session.commit()
+        flash(f"Deal closed! You earned ${referral.commission_usd:.2f} in commission.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Error updating deal status. Please try again.", "danger")
 
     flash(
         f"Deal closed with {referral.facility_name} for ${deal_value:,.0f}. Great work!",
