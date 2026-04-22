@@ -167,14 +167,15 @@
             </div>
 
             {# Crop info #}
-            <div class="flex-grow-1">
+            <div class="flex-grow-1" style="min-width: 0;">
               <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                <h6 class="mb-0 fw-bold fs-5">{{ crop.emoji }} {{ crop.name }}</h6>
-                {% if crop.soil_ok %}
-                  <span class="badge bg-success bg-opacity-75"><i class="bi bi-check-circle me-1"></i>Soil OK</span>
-                {% else %}
-                  <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i>Soil needs work</span>
-                {% endif %}
+                <h6 class="mb-0 fw-bold fs-5 text-break">{{ crop.emoji }} {{ crop.name }}</h6>
+                <div class="d-flex flex-wrap gap-1">
+                  {% if crop.soil_ok %}
+                    <span class="badge bg-success bg-opacity-75"><i class="bi bi-check-circle me-1"></i>Soil OK</span>
+                  {% else %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i>Soil needs work</span>
+                  {% endif %}
 
                 {# ── Feature 5: Water stress risk badge ── #}
                 {% set ws = suggestions.water.stress_score %}
@@ -208,42 +209,39 @@
               </div>
 
               {# Live water budget breakdown #}
-              <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2 flex-wrap small mb-2 px-2 py-2 rounded"
-                   style="background:rgba(13,110,253,0.06); border:1px solid rgba(13,110,253,0.12);">
+              <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-1 flex-wrap small mb-2 px-2 py-2 rounded"
+                   style="background:rgba(13,110,253,0.06); border:1px solid rgba(13,110,253,0.12); overflow-wrap: break-word;">
                 <i class="bi bi-droplet-fill text-primary"></i>
-                <span class="text-muted">Net Water:</span>
+                <span class="text-muted d-none d-sm-inline">Net:</span>
                 <span class="fw-bold text-primary">{{ crop.water_net_in }}"</span>
-                <span class="text-muted small">({{ crop.water_base_in }}" - {{ crop.water_rainfall_in }}" rain)</span>
+                <span class="text-muted" style="font-size: 0.8rem;">({{ crop.water_base_in }}"-{{ crop.water_rainfall_in }}" rain)</span>
                 {% if crop.water_et_method %}
-                  <span class="badge bg-secondary bg-opacity-50 ms-auto" style="font-size:0.6rem;">{{ crop.water_et_method | upper }}</span>
+                  <span class="badge bg-secondary bg-opacity-50 ms-0 ms-sm-auto" style="font-size:0.6rem;">{{ crop.water_et_method | upper }}</span>
                 {% endif %}
               </div>
 
               {# Economics strip #}
-              <div class="row g-2 mb-2">
-                <div class="col-12 col-sm-4 text-center">
-                  <div class="rounded p-2 bg-light small h-100">
-                    <div class="text-muted">Invest</div>
-                    <div class="fw-bold">${{ "{:,}".format(crop.economics.investment_per_acre_usd) }}</div>
+              <div class="row g-2 mb-2 text-center">
+                <div class="col-4">
+                  <div class="p-1 p-sm-2 rounded bg-light border h-100">
+                    <div class="text-muted" style="font-size:0.65rem;">Invest</div>
+                    <div class="fw-bold small text-dark">${{ crop.economics.cost_per_acre }}</div>
                   </div>
                 </div>
-                <div class="col-6 col-sm-4 text-center">
-                  <div class="rounded p-2 bg-light small h-100">
-                    <div class="text-muted">Revenue</div>
-                    <div class="fw-bold text-success">${{ "{:,}".format(crop.economics.revenue_per_acre_usd) }}</div>
+                <div class="col-4">
+                  <div class="p-1 p-sm-2 rounded bg-light border h-100">
+                    <div class="text-muted" style="font-size:0.65rem;">Revenue</div>
+                    <div class="fw-bold small text-success">${{ crop.economics.rev_per_acre }}</div>
                   </div>
                 </div>
-                <div class="col-6 col-sm-4 text-center">
-                  {% set profit = crop.economics.profit_per_acre_usd %}
-                  <div class="rounded p-2 bg-light small h-100">
-                    <div class="text-muted">Profit</div>
-                    <div class="fw-bold {% if profit >= 0 %}text-success{% else %}text-danger{% endif %}">
-                      {% if profit >= 0 %}+{% endif %}${{ "{:,}".format(profit) }}
-                    </div>
+                <div class="col-4">
+                  <div class="p-1 p-sm-2 rounded bg-light border h-100">
+                    <div class="text-muted" style="font-size:0.65rem;">Profit</div>
+                    <div class="fw-bold small text-primary">+${{ crop.economics.profit_per_acre }}</div>
                   </div>
                 </div>
               </div>
-              <div class="small text-muted"><i class="bi bi-info-circle me-1"></i>Source: {{ crop.economics.source }}</div>
+              <div class="small text-muted text-break"><i class="bi bi-info-circle me-1"></i>Source: {{ crop.economics.source }}</div>
 
               {# Issues / amendments #}
               {% if crop.issues %}
@@ -255,9 +253,9 @@
               {% endif %}
 
               {% if crop.amendments %}
-              <div class="mt-2">
+              <div class="mt-2 d-flex flex-wrap gap-1">
                 {% for fix in crop.amendments %}
-                <span class="badge bg-secondary bg-opacity-25 text-secondary me-1 mb-1 small">🔧 {{ fix }}</span>
+                <span class="badge bg-secondary bg-opacity-25 text-secondary text-wrap text-start small" style="white-space: normal; line-height: 1.2;">🔧 {{ fix }}</span>
                 {% endfor %}
               </div>
               {% endif %}
