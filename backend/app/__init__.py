@@ -5,8 +5,17 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from dotenv import load_dotenv
 
-# Load .env from backend root before anything else
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
+# Load environment variables
+# Check local backend folder, parent repo root, and Render secrets mount
+env_paths = [
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"), # backend/.env
+    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"), # repo_root/.env
+    "/etc/secrets/.env" # Render default secrets path
+]
+for path in env_paths:
+    if os.path.exists(path):
+        load_dotenv(path)
+        break
 
 db = SQLAlchemy()
 login_manager = LoginManager()
