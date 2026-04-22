@@ -304,6 +304,30 @@ body {
     white-space: normal;
     text-align: right;
   }
+  /* Fix crop card layout on mobile */
+  .gu-crop-card-score {
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Global overflow fix */
+html, body {
+  overflow-x: hidden;
+  position: relative;
+  width: 100%;
+}
+
+/* Ensure container-fluid doesn't overflow */
+.container, .container-fluid {
+  overflow-x: hidden;
+}
+
+/* Specific fix for crop results badges */
+.badge {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
 }
 
 /* =============================================

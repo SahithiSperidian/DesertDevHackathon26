@@ -23,38 +23,38 @@
 <div class="container py-4">
 
   {# ── Live condition pills ── #}
-  <div class="row g-3 mb-4">
-    <div class="col-auto">
+  <div class="row g-2 mb-4">
+    <div class="col-12 col-md-auto">
       {% set ws = suggestions.water.stress_score %}
-      <span class="badge fs-6 px-3 py-2
+      <span class="badge w-100 fs-6 px-3 py-2
         {% if ws < 40 %}bg-success
         {% elif ws < 70 %}bg-warning text-dark
-        {% else %}bg-danger{% endif %}">
+        {% else %}bg-danger{% endif %} text-start text-md-center">
         <i class="bi bi-droplet-fill me-1"></i>
         River Stress {{ ws }}/100 — {{ suggestions.water.status }}
       </span>
     </div>
-    <div class="col-auto">
+    <div class="col-6 col-md-auto">
       {% set dl = suggestions.drought.level %}
-      <span class="badge fs-6 px-3 py-2
+      <span class="badge w-100 fs-6 px-3 py-2
         {% if dl == 0 %}bg-success
         {% elif dl <= 2 %}bg-warning text-dark
-        {% else %}bg-danger{% endif %}">
+        {% else %}bg-danger{% endif %} text-start text-md-center">
         <i class="bi bi-sun-fill me-1"></i>
         Drought: {{ suggestions.drought.label }}
       </span>
     </div>
-    <div class="col-auto">
+    <div class="col-6 col-md-auto">
       {% if suggestions.rainfall_data.source == 'noaa' %}
-        <span class="badge fs-6 px-3 py-2 bg-info text-dark">
+        <span class="badge w-100 fs-6 px-3 py-2 bg-info text-dark text-start text-md-center">
           <i class="bi bi-cloud-rain me-1"></i>
-          {{ suggestions.rainfall_data.inches }}" seasonal rain — {{ suggestions.rainfall_data.city }}
-          <span class="ms-1 opacity-75" style="font-size:0.7rem;">NOAA live</span>
+          {{ suggestions.rainfall_data.inches }}" rain
+          <span class="ms-1 opacity-75" style="font-size:0.6rem;">NOAA</span>
         </span>
       {% else %}
-        <span class="badge fs-6 px-3 py-2 bg-secondary">
+        <span class="badge w-100 fs-6 px-3 py-2 bg-secondary text-start text-md-center">
           <i class="bi bi-cloud-rain me-1"></i>
-          {{ suggestions.rainfall_data.inches }}" seasonal rain (NM avg)
+          {{ suggestions.rainfall_data.inches }}" seasonal rain
         </span>
       {% endif %}
     </div>
@@ -155,10 +155,10 @@
 
       <div class="card shadow-sm mb-3 border-{{ score_cls }} border-opacity-50">
         <div class="card-body">
-          <div class="d-flex align-items-start gap-3">
+          <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-3">
 
             {# Score ring #}
-            <div class="text-center" style="min-width:70px;">
+            <div class="text-center" style="min-width:80px;">
               <div class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white bg-{{ score_cls }}"
                    style="width:64px;height:64px;font-size:1.2rem;">
                 {{ score }}
@@ -208,44 +208,34 @@
               </div>
 
               {# Live water budget breakdown #}
-              <div class="d-flex align-items-center gap-2 flex-wrap small mb-2 px-2 py-2 rounded"
+              <div class="d-flex align-items-center justify-content-center justify-content-sm-start gap-2 flex-wrap small mb-2 px-2 py-2 rounded"
                    style="background:rgba(13,110,253,0.06); border:1px solid rgba(13,110,253,0.12);">
                 <i class="bi bi-droplet-fill text-primary"></i>
-                <span class="text-muted">Irrigation needed:</span>
-                <span class="fw-semibold">{{ crop.water_base_in }}" base</span>
-                <span class="text-muted">−</span>
-                <span class="text-success fw-semibold">
-                  <i class="bi bi-cloud-rain me-1"></i>{{ crop.water_rainfall_in }}" rain
-                </span>
-                <span class="text-muted">=</span>
-                <span class="fw-bold text-primary">{{ crop.water_net_in }}" net</span>
-                <span class="text-muted">({{ "{:,}".format(crop.water_net_gal) }} gal/acre)</span>
-                {% if crop.water_et_method == 'penman-monteith' %}
-                  <span class="badge bg-primary ms-1" style="font-size:0.6rem;" title="ASCE Penman-Monteith (FAO-56)">PM</span>
-                {% elif crop.water_et_method == 'hargreaves' %}
-                  <span class="badge bg-info text-dark ms-1" style="font-size:0.6rem;" title="Hargreaves-Samani">HS</span>
-                {% else %}
-                  <span class="badge bg-secondary ms-1" style="font-size:0.6rem;" title="NMSU static estimate">NMSU</span>
+                <span class="text-muted">Net Water:</span>
+                <span class="fw-bold text-primary">{{ crop.water_net_in }}"</span>
+                <span class="text-muted small">({{ crop.water_base_in }}" - {{ crop.water_rainfall_in }}" rain)</span>
+                {% if crop.water_et_method %}
+                  <span class="badge bg-secondary bg-opacity-50 ms-auto" style="font-size:0.6rem;">{{ crop.water_et_method | upper }}</span>
                 {% endif %}
               </div>
 
               {# Economics strip #}
               <div class="row g-2 mb-2">
-                <div class="col-4">
-                  <div class="rounded p-2 text-center bg-light small">
+                <div class="col-12 col-sm-4 text-center">
+                  <div class="rounded p-2 bg-light small h-100">
                     <div class="text-muted">Invest</div>
                     <div class="fw-bold">${{ "{:,}".format(crop.economics.investment_per_acre_usd) }}</div>
                   </div>
                 </div>
-                <div class="col-4">
-                  <div class="rounded p-2 text-center bg-light small">
+                <div class="col-6 col-sm-4 text-center">
+                  <div class="rounded p-2 bg-light small h-100">
                     <div class="text-muted">Revenue</div>
                     <div class="fw-bold text-success">${{ "{:,}".format(crop.economics.revenue_per_acre_usd) }}</div>
                   </div>
                 </div>
-                <div class="col-4">
+                <div class="col-6 col-sm-4 text-center">
                   {% set profit = crop.economics.profit_per_acre_usd %}
-                  <div class="rounded p-2 text-center bg-light small">
+                  <div class="rounded p-2 bg-light small h-100">
                     <div class="text-muted">Profit</div>
                     <div class="fw-bold {% if profit >= 0 %}text-success{% else %}text-danger{% endif %}">
                       {% if profit >= 0 %}+{% endif %}${{ "{:,}".format(profit) }}

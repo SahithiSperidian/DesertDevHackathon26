@@ -7,7 +7,7 @@
     <h2 class="fw-bold mb-1">
       <i class="bi bi-tree-fill me-2"></i>Farmer Dashboard
       {% if current_user.is_subscribed %}
-      <span class="badge bg-warning text-dark ms-2 fs-6 align-middle"><i class="bi bi-patch-check-fill me-1"></i>Pro</span>
+      <span class="badge bg-warning text-dark ms-0 ms-sm-2 mt-2 mt-sm-0 fs-6 align-middle d-inline-block"><i class="bi bi-patch-check-fill me-1"></i>Pro</span>
       {% endif %}
     </h2>
     <p class="mb-0 opacity-75">Welcome, {{ current_user.name }} &mdash; {{ current_user.location or 'New Mexico' }}</p>
@@ -120,10 +120,10 @@
       {% if trend_summary %}
       <div class="d-flex flex-wrap gap-2 mb-3">
         {% for item in trend_summary %}
-        <span class="badge fs-6 fs-sm-6 px-2 px-md-3 py-2
-          {% if item.good %}bg-success{% else %}bg-danger{% endif %}">
+        <span class="badge fs-6 px-2 px-md-3 py-2 text-wrap text-start
+          {% if item.good %}bg-success{% else %}bg-danger{% endif %} shadow-sm">
           {{ item.arrow }} {{ item.label }}
-          {% if item.pct > 0 %}{{ item.pct }}% since last test{% endif %}
+          {% if item.pct > 0 %}{{ item.pct }}%{% endif %}
         </span>
         {% endfor %}
       </div>

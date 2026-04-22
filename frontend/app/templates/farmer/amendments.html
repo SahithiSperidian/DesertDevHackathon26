@@ -72,11 +72,15 @@
   {% for d in result.deficiencies %}
   <div class="card shadow-sm mb-4 border-{{ d.badge_color }}">
     <div class="card-header bg-{{ d.badge_color }} bg-opacity-10 border-bottom border-{{ d.badge_color }} border-opacity-25">
-      <div class="d-flex flex-wrap align-items-center gap-2">
-        <i class="bi {{ d.icon }} text-{{ d.badge_color }}"></i>
-        <span class="fw-bold">{{ d.nutrient }}</span>
-        <span class="badge bg-{{ d.badge_color }}">Deficient</span>
-        <span class="ms-auto text-muted small text-nowrap">Current: <strong>{{ d.current }}</strong> &rarr; Target: <strong>{{ d.target }}</strong></span>
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi {{ d.icon }} text-{{ d.badge_color }}"></i>
+          <span class="fw-bold">{{ d.nutrient }}</span>
+          <span class="badge bg-{{ d.badge_color }}">Deficient</span>
+        </div>
+        <div class="text-muted small">
+          Current: <strong>{{ d.current }}</strong> &rarr; Target: <strong>{{ d.target }}</strong>
+        </div>
       </div>
     </div>
     <div class="card-body">

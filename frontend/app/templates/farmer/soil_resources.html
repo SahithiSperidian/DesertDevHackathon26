@@ -1,4 +1,4 @@
-﻿{% extends "base.html" %}
+{% extends "base.html" %}
 {% block title %}Soil Resources — CropPulse{% endblock %}
 
 {% block content %}
@@ -133,11 +133,11 @@
           <th style="width:130px;">Action</th>
           <th>Name</th>
           <th>What It Processes</th>
-          <th style="width:140px;">Phone</th>
-          <th style="width:80px;" class="text-center">Website</th>
+          <th style="width:140px;" class="d-none d-lg-table-cell">Phone</th>
+          <th style="width:80px;" class="text-center d-none d-lg-table-cell">Website</th>
           <th style="width:90px;" class="text-center">Distance</th>
-          <th>Address</th>
-          <th style="width:160px;" class="text-center">Refer via CropPulse</th>
+          <th class="d-none d-md-table-cell">Address</th>
+          <th style="width:160px;" class="text-center">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -156,13 +156,13 @@
           </td>
           <td class="fw-semibold">{{ f.name }}</td>
           <td class="small text-muted">{{ f.feedstock if f.feedstock else '—' }}</td>
-          <td class="small">
+          <td class="small d-none d-lg-table-cell">
             {% if f.lat and f.lon %}
             <div class="text-muted" style="font-size:0.7rem;">Call for digestate availability</div>
             {% endif %}
             —
           </td>
-          <td class="text-center">—</td>
+          <td class="text-center d-none d-lg-table-cell">—</td>
           <td class="text-center">
             {% if f.distance_miles is not none %}
             <span class="badge {% if f.distance_miles < 30 %}bg-success{% elif f.distance_miles < 75 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
@@ -189,12 +189,12 @@
           </td>
           <td class="fw-semibold">{{ f.name }}</td>
           <td class="small text-muted">{{ f.feedstock if f.feedstock else '—' }}</td>
-          <td class="small">
+          <td class="small d-none d-lg-table-cell">
             {% if f.phone %}
             <a href="tel:{{ f.phone }}" class="text-decoration-none">{{ f.phone }}</a>
             {% else %}—{% endif %}
           </td>
-          <td class="text-center">
+          <td class="text-center d-none d-lg-table-cell">
             {% if f.website %}
             <a href="http://{{ f.website }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm py-0 px-1">
               <i class="bi bi-box-arrow-up-right"></i>
@@ -208,7 +208,7 @@
             </span>
             {% else %}—{% endif %}
           </td>
-          <td class="small">
+          <td class="small d-none d-md-table-cell">
             {% if f.city %}{{ f.city }}{% if f.county %}, {{ f.county }}{% endif %}{% endif %}
             {% if f.address %}<br><span class="text-muted">{{ f.address }}{% if f.zip %}, {{ f.zip }}{% endif %}</span>{% endif %}
           </td>
